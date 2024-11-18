@@ -14,7 +14,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
-      <module name="WaterMall" target="1.5" />
+      <module name="WaterMall" target="1.8" />
       <module name="watermall-coupon" target="1.8" />
       <module name="watermall-member" target="1.8" />
       <module name="watermall-order" target="1.8" />

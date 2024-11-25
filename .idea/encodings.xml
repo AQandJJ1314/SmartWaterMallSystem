@@ -3,8 +3,6 @@
   <component name="Encoding">
     <file url="file://$PROJECT_DIR$/renren-fast/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/renren-generator/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/watermall-coupon/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/watermall-coupon/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/watermall-member/src/main/java" charset="UTF-8" />
@@ -15,6 +13,6 @@
     <file url="file://$PROJECT_DIR$/watermall-product/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/watermall-ware/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/watermall-ware/src/main/resources" charset="UTF-8" />
-    <file url="file://$PROJECT_DIR$/../apache-maven-3.8.1/apache-maven-3.8.1/maven_repository1/org/springframework/boot/spring-boot-starter-parent/2.6.6/src/main/resources" charset="UTF-8" />
+    <file url="PROJECT" charset="UTF-8" />
   </component>
 </project>

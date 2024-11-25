@@ -3,11 +3,6 @@
   <component name="MavenProjectsManager">
     <option name="originalFiles">
       <list>
-        <option value="$PROJECT_DIR$/watermall-product/pom.xml" />
-        <option value="$PROJECT_DIR$/watermall-order/pom.xml" />
-        <option value="$PROJECT_DIR$/watermall-member/pom.xml" />
-        <option value="$PROJECT_DIR$/watermall-coupon/pom.xml" />
-        <option value="$PROJECT_DIR$/watermall-ware/pom.xml" />
         <option value="$PROJECT_DIR$/pom.xml" />
       </list>
     </option>

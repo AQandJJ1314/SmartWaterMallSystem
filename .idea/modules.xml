@@ -5,6 +5,7 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/SmartWaterMallSystem.iml" filepath="$PROJECT_DIR$/.idea/SmartWaterMallSystem.iml" />
       <module fileurl="file://$PROJECT_DIR$/renren-fast/renren-fast.iml" filepath="$PROJECT_DIR$/renren-fast/renren-fast.iml" />
       <module fileurl="file://$PROJECT_DIR$/renren-generator/renren-generator.iml" filepath="$PROJECT_DIR$/renren-generator/renren-generator.iml" />
+      <module fileurl="file://$PROJECT_DIR$/watermall.iml" filepath="$PROJECT_DIR$/watermall.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall-common/watermall-common.iml" filepath="$PROJECT_DIR$/watermall-common/watermall-common.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall-coupon/watermall-coupon.iml" filepath="$PROJECT_DIR$/watermall-coupon/watermall-coupon.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall-member/watermall-member.iml" filepath="$PROJECT_DIR$/watermall-member/watermall-member.iml" />

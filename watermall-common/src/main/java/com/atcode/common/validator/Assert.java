@@ -8,7 +8,7 @@
 
 package com.atcode.common.validator;
 
-import io.renren.common.exception.RRException;
+import com.atcode.common.exception.RRException;
 import org.apache.commons.lang.StringUtils;
 
 /**

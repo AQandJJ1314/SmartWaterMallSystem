@@ -20,6 +20,7 @@
       <module name="renren-fast" target="1.8" />
       <module name="renren-generator" target="1.8" />
       <module name="SmartWaterMallSystem" target="1.8" />
+      <module name="watermall" target="1.8" />
       <module name="watermall-common" target="1.8" />
       <module name="watermall-coupon" target="1.8" />
       <module name="watermall-member" target="1.8" />

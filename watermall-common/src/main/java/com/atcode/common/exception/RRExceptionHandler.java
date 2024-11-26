@@ -8,7 +8,7 @@
 
 package com.atcode.common.exception;
 
-import io.renren.common.utils.R;
+import com.atcode.common.utils.R;
 import org.apache.shiro.authz.AuthorizationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

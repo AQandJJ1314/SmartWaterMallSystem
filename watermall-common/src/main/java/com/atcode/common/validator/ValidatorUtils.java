@@ -8,8 +8,8 @@
 
 package com.atcode.common.validator;
 
-import io.renren.common.exception.RRException;
-import io.renren.common.utils.Constant;
+import com.atcode.common.exception.RRException;
+import com.atcode.common.utils.Constant;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;

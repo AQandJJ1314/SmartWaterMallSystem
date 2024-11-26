@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/SmartWaterMallSystem.iml" filepath="$PROJECT_DIR$/.idea/SmartWaterMallSystem.iml" />
       <module fileurl="file://$PROJECT_DIR$/renren-fast/renren-fast.iml" filepath="$PROJECT_DIR$/renren-fast/renren-fast.iml" />
       <module fileurl="file://$PROJECT_DIR$/renren-generator/renren-generator.iml" filepath="$PROJECT_DIR$/renren-generator/renren-generator.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall.iml" filepath="$PROJECT_DIR$/watermall.iml" />

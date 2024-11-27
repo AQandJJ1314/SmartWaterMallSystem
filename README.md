@@ -61,3 +61,9 @@ com.atcode.watermall.coupon.WatermallCouponApplication
      在properties文件加入 spring.main.web-application-type=reactive
 
 
+JAVA8新特性内容，在创建查询三级目录时的serviceimpl层
+  List<CategoryEntity> level1Menu = entities.stream().filter((categoryEntity) -> {
+  return categoryEntity.getParentCid() == 0;
+   }).collect(Collectors.toList());
+
+

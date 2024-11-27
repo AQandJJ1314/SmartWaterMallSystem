@@ -1,15 +1,18 @@
 package com.atcode.watermall.product.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
 import lombok.Data;
 
 /**
  * 商品三级分类
- * 
+ *
  * @author JiangCheng
  * @email JiangCheng@watermail.com
  * @date 2024-11-25 19:53:42
@@ -56,5 +59,11 @@ public class CategoryEntity implements Serializable {
 	 * 商品数量
 	 */
 	private Integer productCount;
+
+	/**
+	 * 父节点(parent_id = 0)的所有子节点
+	 */
+	@TableField(exist = false)
+	private List<CategoryEntity> children;
 
 }

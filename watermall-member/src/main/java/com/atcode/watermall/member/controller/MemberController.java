@@ -34,6 +34,7 @@ public class MemberController {
 
     @Autowired
     CouponFeginService couponFeginService;
+
     /**
      * 用于测试和coupons服务的远程调用
      */

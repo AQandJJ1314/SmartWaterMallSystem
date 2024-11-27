@@ -7,6 +7,7 @@
       <module fileurl="file://$PROJECT_DIR$/watermall.iml" filepath="$PROJECT_DIR$/watermall.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall-common/watermall-common.iml" filepath="$PROJECT_DIR$/watermall-common/watermall-common.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall-coupon/watermall-coupon.iml" filepath="$PROJECT_DIR$/watermall-coupon/watermall-coupon.iml" />
+      <module fileurl="file://$PROJECT_DIR$/watermall-gateway/watermall-gateway.iml" filepath="$PROJECT_DIR$/watermall-gateway/watermall-gateway.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall-member/watermall-member.iml" filepath="$PROJECT_DIR$/watermall-member/watermall-member.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall-order/watermall-order.iml" filepath="$PROJECT_DIR$/watermall-order/watermall-order.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall-product/watermall-product.iml" filepath="$PROJECT_DIR$/watermall-product/watermall-product.iml" />

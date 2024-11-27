@@ -11,6 +11,7 @@
         <module name="watermall-coupon" />
         <module name="watermall-product" />
         <module name="watermall-member" />
+        <module name="watermall-gateway" />
         <module name="renren-fast" />
         <module name="watermall-common" />
         <module name="watermall-order" />
@@ -24,6 +25,7 @@
       <module name="watermall" target="1.8" />
       <module name="watermall-common" target="1.8" />
       <module name="watermall-coupon" target="1.8" />
+      <module name="watermall-gateway" target="1.8" />
       <module name="watermall-member" target="1.8" />
       <module name="watermall-order" target="1.8" />
       <module name="watermall-product" target="1.8" />

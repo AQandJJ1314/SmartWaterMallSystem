@@ -66,4 +66,20 @@ JAVA8新特性内容，在创建查询三级目录时的serviceimpl层
   return categoryEntity.getParentCid() == 0;
    }).collect(Collectors.toList());
 
+解决lombok插件失效的问题：使用标准的javabean
+
+# 路由id，自定义，只要唯一即可
+        - id: admin_route
+# uri路由的目标地址。lb就是负载均衡，后面跟服务名称。
+          uri: lb://renren-fast
+          #断言工厂的Path，请求路径必须符合指定规则
+          predicates:
+            - Path=/api/**    # 把所有api开头的请求都转发给renren-fast
+          #局部过滤器。回顾默认过滤器default-filters是与routes同级
+          filters:
+#路径重写。逗号左边是原路径，右边是重写后的路径
+- RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
+# 默认规则， 请求过来：http://localhost:88/api/captcha.jpg   转发-->  http://renren-fast:8080/renren-fast/captcha.jpg
+
+
 

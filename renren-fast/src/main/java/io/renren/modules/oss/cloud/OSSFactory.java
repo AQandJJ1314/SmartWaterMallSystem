@@ -41,4 +41,11 @@ public final class OSSFactory {
         return null;
     }
 
+    public static SysConfigService getSysConfigService() {
+        return sysConfigService;
+    }
+
+    public static void setSysConfigService(SysConfigService sysConfigService) {
+        OSSFactory.sysConfigService = sysConfigService;
+    }
 }

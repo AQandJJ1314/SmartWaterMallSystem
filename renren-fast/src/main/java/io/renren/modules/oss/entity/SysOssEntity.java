@@ -25,7 +25,7 @@ import java.util.Date;
 @TableName("sys_oss")
 public class SysOssEntity implements Serializable {
 	private static final long serialVersionUID = 1L;
-	
+
 	@TableId
 	private Long id;
 	//URL地址
@@ -33,4 +33,27 @@ public class SysOssEntity implements Serializable {
 	//创建时间
 	private Date createDate;
 
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public Date getCreateDate() {
+		return createDate;
+	}
+
+	public void setCreateDate(Date createDate) {
+		this.createDate = createDate;
+	}
 }

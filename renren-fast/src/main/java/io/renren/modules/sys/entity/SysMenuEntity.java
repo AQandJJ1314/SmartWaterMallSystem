@@ -26,7 +26,7 @@ import java.util.List;
 @TableName("sys_menu")
 public class SysMenuEntity implements Serializable,Comparable<SysMenuEntity> {
 	private static final long serialVersionUID = 1L;
-	
+
 	/**
 	 * 菜单ID
 	 */
@@ -37,7 +37,7 @@ public class SysMenuEntity implements Serializable,Comparable<SysMenuEntity> {
 	 * 父菜单ID，一级菜单为0
 	 */
 	private Long parentId;
-	
+
 	/**
 	 * 父菜单名称
 	 */
@@ -73,7 +73,7 @@ public class SysMenuEntity implements Serializable,Comparable<SysMenuEntity> {
 	 * 排序
 	 */
 	private Integer orderNum;
-	
+
 	/**
 	 * ztree属性
 	 */
@@ -86,5 +86,94 @@ public class SysMenuEntity implements Serializable,Comparable<SysMenuEntity> {
 	@Override
 	public int compareTo(SysMenuEntity o) {
 		return this.getOrderNum()-o.getOrderNum();
+	}
+
+
+	public Long getMenuId() {
+		return menuId;
+	}
+
+	public void setMenuId(Long menuId) {
+		this.menuId = menuId;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
+
+	public String getParentName() {
+		return parentName;
+	}
+
+	public void setParentName(String parentName) {
+		this.parentName = parentName;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getPerms() {
+		return perms;
+	}
+
+	public void setPerms(String perms) {
+		this.perms = perms;
+	}
+
+	public Integer getType() {
+		return type;
+	}
+
+	public void setType(Integer type) {
+		this.type = type;
+	}
+
+	public String getIcon() {
+		return icon;
+	}
+
+	public void setIcon(String icon) {
+		this.icon = icon;
+	}
+
+	public Integer getOrderNum() {
+		return orderNum;
+	}
+
+	public void setOrderNum(Integer orderNum) {
+		this.orderNum = orderNum;
+	}
+
+	public Boolean getOpen() {
+		return open;
+	}
+
+	public void setOpen(Boolean open) {
+		this.open = open;
+	}
+
+	public List<SysMenuEntity> getList() {
+		return list;
+	}
+
+	public void setList(List<SysMenuEntity> list) {
+		this.list = list;
 	}
 }

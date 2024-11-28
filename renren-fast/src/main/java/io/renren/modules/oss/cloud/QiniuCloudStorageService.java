@@ -74,4 +74,21 @@ public class QiniuCloudStorageService extends CloudStorageService {
     public String uploadSuffix(InputStream inputStream, String suffix) {
         return upload(inputStream, getPath(config.getQiniuPrefix(), suffix));
     }
+
+
+    public UploadManager getUploadManager() {
+        return uploadManager;
+    }
+
+    public void setUploadManager(UploadManager uploadManager) {
+        this.uploadManager = uploadManager;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
+    }
 }

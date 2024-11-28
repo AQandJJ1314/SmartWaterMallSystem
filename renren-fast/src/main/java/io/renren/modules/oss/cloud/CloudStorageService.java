@@ -75,4 +75,11 @@ public abstract class CloudStorageService {
      */
     public abstract String uploadSuffix(InputStream inputStream, String suffix);
 
+    public CloudStorageConfig getConfig() {
+        return config;
+    }
+
+    public void setConfig(CloudStorageConfig config) {
+        this.config = config;
+    }
 }

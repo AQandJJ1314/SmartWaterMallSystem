@@ -59,4 +59,12 @@ public class AliyunCloudStorageService extends CloudStorageService {
     public String uploadSuffix(InputStream inputStream, String suffix) {
         return upload(inputStream, getPath(config.getAliyunPrefix(), suffix));
     }
+
+    public OSSClient getClient() {
+        return client;
+    }
+
+    public void setClient(OSSClient client) {
+        this.client = client;
+    }
 }

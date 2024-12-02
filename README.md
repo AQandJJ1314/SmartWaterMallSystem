@@ -114,4 +114,112 @@ corsConfiguration.setAllowCredentials(true);
 注意: application.yaml文件中配置的是服务的命名空间，bootstrap.properties文件中配置的是配置中心的命名空间
       两者不一样！！！！！
 
+  统一封装错误状态码
+正规开发过程中，错误状态码有着严格的定义规则
+错误码和错误信息定义类：
+1. 错误码定义规则为五位数字
+2. 前两位表示业务场景，最后三位表示错误码。例如：100001。10:通用 001:系统未知异常
+3. 维护错误码后需要维护错误描述，将他们定义为枚举形式
+   //错误码和错误信息定义类：
+  
+   //        1. 错误码定义规则为五位数字
+
+   //        2. 前两位表示业务场景，最后三位表示错误码。例如：100001。10:通用 001:系统未知异常
+  
+   //        3. 维护错误码后需要维护错误描述，将他们定义为枚举形式
+
+   //        错误码列表（前两位业务场景）：
+
+   //         10: 通用
+   //             如10001：参数格式校验失败
+
+   //         11: 商品
+
+   //         12: 订单
+
+   //         13: 购物车
+
+   //         14: 物流
+
+
+JSR303
+/**
+* JSR303
+* 1.给bean添加javax.validation.constraints.* ,并定义自己的message提示
+* 2.开启校验功能@Valid
+* 3.校验的Bean后紧跟一个BindingResult,就可以获取到校验的结果  此参数能够得到异常的信息
+  */
+* 
+  //@RequestMapping("/save")
+  
+* //    public R save(@Valid @RequestBody BrandEntity brand, BindingResult result){
+  
+* //        if (result.hasErrors()){
+ 
+* //            Map<String, String> map = new HashMap<>();
+  
+* //            //1、获取校验的结果
+ 
+* //            result.getFieldErrors().forEach((item)->{
+  
+* //                //获取到错误提示
+ 
+* //                String message = item.getDefaultMessage();
+  
+* //                //获取到错误属性的名字(校验错误的字段)
+ 
+* //                String field = item.getField();
+  
+* //                map.put(field, message);
+  
+* //            });
+  
+* //            return R.error().put("data", map);
+  
+* //        }else{
+  
+* //            brandService.save(brand);
+ 
+* //        }
+  
+* //        return R.ok();
+  
+* //    }
+ 
+* 参数校验异常
+/** 位置 product/entity/BrandEneity.class
+* 关于参数校验异常
+* @NotEmpty和@NotBlank区别：
+* @NotEmpty非空，不能是null和""
+* @NotBlank 非空白，不能是null和""和"  "
+* 自定义校验规则@Pattern(regexp = "^[a-zA-Z]$", message = "检索首字母必须是一个字母")
+* 1.要给实体类对应的属性添加注解，在注解上也可以自定义message
+* 2.在Controller层也要添加注解 @Valid
+* 
+  */
+* {"name": "aa", "logo": "https://www.baidu.com","sort":"1","firstLetter":"A"}
+
+  统一异常处理
+/**  位置 com.atcode.watermall.product.exception.WatermallExceptionControllerAdvice
+* 统一的异常处理  使用SpringMVC提供的 @ControllerAdvice
+* 集中处理所有异常
+* @ResponseBody 该注解用于返回json的数据
+* @RestControllerAdvice =  @ControllerAdvice + @ResponseBody
+* @ExceptionHandler(value = MethodArgumentNotValidException.class)  
+* 上一个注解能让SpringMVC知道 此异常处理器类能处理什么异常 value 初始可以用Exception.class，测试获得异常类型
+* 捕获到异常之后可以用更详细的  MethodArgumentNotValidException
+* bindingResult.getFieldErrors() 获得数据校验的异常的结果
+* handleVaildException方法相当于一个精确的异常处理，当这个方法不能捕获到异常时，采用下面的更大范围的异常处理方法handleException
+  */
+
+位置  product/entity/BrandEneity.class
+  分组校验 (JSR303提供的功能)，增改校验分开，@Validated (spring框架提供的规范)
+
+  场景：新增时id必须为空，修改时id必须非空，这样实体类注解就凌乱了，这时就必须用到分组校验。
+
+  注意：在common模块中valid包里新建空接口AddGroup,UpdateGroup用来分组
+
+  实体类变量注解分组，代表此变量支持这些分组的校验。
+  controller参数对象注解分组，代表这个对象只校验有配置这个分组的成员变量。
+
 

@@ -77,6 +77,19 @@ public class CategoryController {
     }
 
     /**
+     * 批量修改，参数要传数组，不能传list
+     * @param category
+     * @return
+     */
+
+    @RequestMapping("/update/sort")
+    public R updateSort(@RequestBody CategoryEntity[] category){
+        categoryService.updateBatchById(Arrays.asList(category));
+        return R.ok();
+    }
+
+
+    /**
      * 删除
      * @RequestBody 该注解是获取到请求体中的内容，必须发送POST请求，只有POST请求有请求体
      * SpringMVC会将请求体中的内容（json），转为对应的对象

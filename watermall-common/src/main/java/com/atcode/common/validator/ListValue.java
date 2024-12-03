@@ -1,7 +1,5 @@
 package com.atcode.common.validator;
 
-import com.atcode.common.validator.group.ListValueConstraintValidator;
-
 import javax.validation.Constraint;
 import javax.validation.Payload;
 import java.lang.annotation.*;
@@ -14,7 +12,7 @@ import java.lang.annotation.*;
 //注解的时机。这里是可以在运行时获取校验
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ListValue {
-    //    校验出错后，错误信息去哪取。前缀一般是当前全类名，在ValidationMessages.properties配置文件里设置com.atguigu.common.valid.ListValue.message=必须提交指定的值
+    //    校验出错后，错误信息去哪取。前缀一般是当前全类名，在ValidationMessages.properties配置文件里设置com.atcode.common.validator.ListValue.message=The specified value must be submitted
     String message() default "{com.atcode.common.validator.ListValue.message}";
     //    支持分组校验的功能
     Class<?>[] groups() default {};

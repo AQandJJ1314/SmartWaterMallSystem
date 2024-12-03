@@ -44,6 +44,7 @@ public class WatermallExceptionControllerAdvice {
     //处理全局异常
     @ExceptionHandler(value = Throwable.class)    //Exception和Error继承自Throwable
     public R handleException(Throwable throwable){
+        log.error("错误: ",throwable);
         return R.error(BizCodeEnum.UNKNOW_EXEPTION.getCode(), BizCodeEnum.UNKNOW_EXEPTION.getMsg());
     }
 

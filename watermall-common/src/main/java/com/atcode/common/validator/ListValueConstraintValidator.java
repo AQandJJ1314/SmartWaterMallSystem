@@ -1,4 +1,4 @@
-package com.atcode.common.validator.group;
+package com.atcode.common.validator;
 
 import com.atcode.common.validator.ListValue;
 
@@ -7,6 +7,9 @@ import javax.validation.ConstraintValidatorContext;
 import java.util.HashSet;
 import java.util.Set;
 
+/**
+ * 自定义校验器，用于@ListValue注解
+ */
 //第一个泛型是校验注解，第二个泛型是校验数据类型
 public class ListValueConstraintValidator implements ConstraintValidator<ListValue,Integer> {
     private Set<Integer> set=new HashSet<>();

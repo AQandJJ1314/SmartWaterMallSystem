@@ -1,8 +1,15 @@
 package com.atcode.watermall.product.service.impl;
 
 import com.alibaba.cloud.commons.lang.StringUtils;
+import com.atcode.watermall.product.dao.CategoryDao;
+import com.atcode.watermall.product.entity.CategoryEntity;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -17,6 +24,7 @@ import com.atcode.watermall.product.service.AttrGroupService;
 
 @Service("attrGroupService")
 public class AttrGroupServiceImpl extends ServiceImpl<AttrGroupDao, AttrGroupEntity> implements AttrGroupService {
+
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {

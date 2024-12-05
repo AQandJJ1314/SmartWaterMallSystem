@@ -1,5 +1,6 @@
 package com.atcode.watermall.product.entity;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -9,7 +10,7 @@ import lombok.Data;
 
 /**
  * 属性分组
- * 
+ *
  * @author JiangCheng
  * @email JiangCheng@watermail.com
  * @date 2024-11-25 19:53:42
@@ -44,5 +45,11 @@ public class AttrGroupEntity implements Serializable {
 	 * 所属分类id
 	 */
 	private Long catelogId;
+
+	/**
+	 * 分类路径的成员变量
+	 */
+	@TableField(exist = false)
+	private Long[] catelogPath;
 
 }

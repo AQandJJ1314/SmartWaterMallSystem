@@ -3,6 +3,7 @@ package com.atcode.watermall.product.service.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -67,6 +68,31 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
         //逻辑删除
         baseMapper.deleteBatchIds(asList);
+    }
+
+    @Override
+    public Long[] findCatelogPath(Long catelogId) {
+        List<Long> paths = new ArrayList<>();
+        List<Long> parentPath = findParentPath(paths,catelogId);
+        return parentPath.toArray(new Long[parentPath.size()]);
+    }
+
+    /**
+     * 递归查询父节点id
+     * @param paths
+     * @param catelogId
+     * @return
+     */
+    private List<Long> findParentPath(List<Long> paths, Long catelogId) {
+        CategoryEntity categoryEntity = this.getById(catelogId);
+
+        if(categoryEntity == null) return paths;
+
+        if (categoryEntity.getParentCid() != 0){
+            findParentPath(paths ,categoryEntity.getParentCid());
+        }
+        paths.add(catelogId);
+        return paths;
     }
 
     //递归查找所有菜单的子菜单

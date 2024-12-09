@@ -1,11 +1,13 @@
 package com.atcode.watermall.product.service;
 
+import com.atcode.watermall.product.vo.AttrGroupRelationVo;
 import com.atcode.watermall.product.vo.AttrRespVo;
 import com.atcode.watermall.product.vo.AttrVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atcode.common.utils.PageUtils;
 import com.atcode.watermall.product.entity.AttrEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -36,5 +38,11 @@ public interface AttrService extends IService<AttrEntity> {
     AttrRespVo getAttrInfo(Long attrId);
 
     void updateAttr(AttrVo attr);
+
+    List<AttrEntity> getRelationAttr(Long attrgroupId);
+
+    void deleteRelation(AttrGroupRelationVo[] vos);
+
+    PageUtils getNoRelationAttr(Map<String, Object> params, Long attrgroupId);
 }
 

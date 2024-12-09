@@ -4,14 +4,11 @@ import java.util.Arrays;
 import java.util.Map;
 
 //import org.apache.shiro.authz.annotation.RequiresPermissions;
+import com.atcode.watermall.product.vo.AttrGroupRelationVo;
 import com.atcode.watermall.product.vo.AttrRespVo;
 import com.atcode.watermall.product.vo.AttrVo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import com.atcode.watermall.product.service.AttrService;
 import com.atcode.common.utils.PageUtils;
@@ -131,5 +128,17 @@ public class AttrController {
 
         return R.ok();
     }
+
+    /**
+     * 批量删除属性与分组的关联关系
+     * @param vos
+     * @return
+     */
+    @PostMapping("/attr/relation/delete")
+    public R attrRelationDelete(@RequestBody AttrGroupRelationVo[] vos){
+        attrService.deleteRelation(vos);
+        return R.ok();
+    }
+
 
 }

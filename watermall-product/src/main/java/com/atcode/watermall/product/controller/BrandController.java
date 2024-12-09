@@ -94,13 +94,26 @@ public class BrandController {
 //        return R.ok();
 //    }
 
+//    /**
+//     * 修改
+//     */
+//    @RequestMapping("/update")
+//    //@RequiresPermissions("product:brand:update")
+//    public R update(@RequestBody @Validated({UpdateGroup.class}) BrandEntity brand){
+//		brandService.updateById(brand);
+//
+//        return R.ok();
+//    }
+
     /**
-     * 修改
+     * 修改品牌名时，同步修改关联表的品牌名
+     * @param brand
+     * @return
      */
     @RequestMapping("/update")
     //@RequiresPermissions("product:brand:update")
-    public R update(@RequestBody @Validated({UpdateGroup.class}) BrandEntity brand){
-		brandService.updateById(brand);
+    public R update(@Validated(value = {UpdateGroup.class})@RequestBody BrandEntity brand){
+        brandService.updateByIdDetail(brand);
 
         return R.ok();
     }

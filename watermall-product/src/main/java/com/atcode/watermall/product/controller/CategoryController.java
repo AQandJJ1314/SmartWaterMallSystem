@@ -65,13 +65,24 @@ public class CategoryController {
         return R.ok();
     }
 
+//    /**
+//     * 修改
+//     */
+//    @RequestMapping("/update")
+//    //@RequiresPermissions("product:category:update")
+//    public R update(@RequestBody CategoryEntity category){
+//		categoryService.updateById(category);
+//
+//        return R.ok();
+//    }
     /**
+     * 修改分类名时，同步修改关联表的分类名。映射配置文件xml方法 对应brand
      * 修改
      */
     @RequestMapping("/update")
     //@RequiresPermissions("product:category:update")
     public R update(@RequestBody CategoryEntity category){
-		categoryService.updateById(category);
+        categoryService.updateCascade(category);
 
         return R.ok();
     }

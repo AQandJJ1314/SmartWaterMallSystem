@@ -1,5 +1,6 @@
 package com.atcode.watermall.product.service.impl;
 
+import com.atcode.watermall.product.service.CategoryBrandRelationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -17,14 +18,21 @@ import com.atcode.common.utils.Query;
 import com.atcode.watermall.product.dao.CategoryDao;
 import com.atcode.watermall.product.entity.CategoryEntity;
 import com.atcode.watermall.product.service.CategoryService;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.annotation.Transactional;
 
 
+@EnableTransactionManagement
 @Service("categoryService")
 public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity> implements CategoryService {
 
     //注入DAO或者使用BaseMapper
 //    @Autowired
 //    CategoryDao categoryDao;
+
+
+    @Autowired
+    CategoryBrandRelationService categoryBrandRelationService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -77,6 +85,13 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return parentPath.toArray(new Long[parentPath.size()]);
     }
 
+    //别忘了加业务注解，引导类开启了业务@EnableTransactionManagement
+    @Transactional
+    @Override
+    public void updateCascade(CategoryEntity category) {
+        this.updateById(category);
+        categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
+    }
     /**
      * 递归查询父节点id
      * @param paths

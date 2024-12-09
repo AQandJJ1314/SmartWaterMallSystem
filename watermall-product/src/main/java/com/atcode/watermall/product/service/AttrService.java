@@ -1,5 +1,7 @@
 package com.atcode.watermall.product.service;
 
+import com.atcode.watermall.product.vo.AttrRespVo;
+import com.atcode.watermall.product.vo.AttrVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atcode.common.utils.PageUtils;
 import com.atcode.watermall.product.entity.AttrEntity;
@@ -16,5 +18,23 @@ import java.util.Map;
 public interface AttrService extends IService<AttrEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    //    @Override
+    //    public PageUtils queryPage(Map<String, Object> params) {
+    //        IPage<AttrEntity> page = this.page(
+    //                new Query<AttrEntity>().getPage(params),
+    //                new QueryWrapper<AttrEntity>()
+    //        );
+    //
+    //        return new PageUtils(page);
+    //    }
+
+    void saveAttr(AttrVo attr);
+
+    PageUtils queryBaseAttrPage(Map<String, Object> params, Long catelogId,String attrType);
+
+    AttrRespVo getAttrInfo(Long attrId);
+
+    void updateAttr(AttrVo attr);
 }
 

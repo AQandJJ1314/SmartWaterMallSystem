@@ -18,8 +18,6 @@ import com.atcode.watermall.product.service.AttrGroupService;
 import com.atcode.common.utils.PageUtils;
 import com.atcode.common.utils.R;
 
-import javax.management.relation.RelationService;
-
 
 /**
  * 属性分组
@@ -47,8 +45,7 @@ public class AttrGroupController {
      */
     @RequestMapping("/list/{catlogId}")
     //@RequiresPermissions("product:attrgroup:list")
-    public R list(@RequestParam Map<String, Object> params,
-                  @PathVariable Long catlogId){
+    public R list(@RequestParam Map<String, Object> params, @PathVariable("catlogId") Long catlogId){
 //        PageUtils page = attrGroupService.queryPage(params);
         PageUtils page = attrGroupService.queryPage(params,catlogId);
 

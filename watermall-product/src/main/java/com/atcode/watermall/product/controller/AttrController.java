@@ -53,6 +53,7 @@ public class AttrController {
     //路径参数和形参名同名时，@PathVariable的值可以省略。
     public R baseList(@RequestParam Map<String, Object> params, @PathVariable("catelogId") Long catelogId,
                       @PathVariable("attrType") String attrType){
+//        System.out.println("attrType"+attrType);
         PageUtils page = attrService.queryBaseAttrPage(params, catelogId, attrType);
         return R.ok().put("page", page);
     }
@@ -77,6 +78,7 @@ public class AttrController {
 
     /**
      * 信息  这里传入类别的路径
+     * 关联为空的时候不显示数据，即分组(group_id)为空的时候
      */
     @RequestMapping("/info/{attrId}")
     public R info(@PathVariable("attrId") Long attrId){

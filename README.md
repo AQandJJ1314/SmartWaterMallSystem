@@ -270,5 +270,22 @@ int[] vals() default {};
 }
 
 
+    关于路径变量注解：@PathVariable
+    /**
+     * 列表
+     */
+    @RequestMapping("/list/{catlogId}")
+    //@RequiresPermissions("product:attrgroup:list")
+    public R list(@RequestParam Map<String, Object> params, @PathVariable("catlogId") Long catlogId){
+//        PageUtils page = attrGroupService.queryPage(params);
+PageUtils page = attrGroupService.queryPage(params,catlogId);
+
+        return R.ok().put("page", page);
+    }
+
+解决前端级联菜单渲染问题： com.atcode.watermall.product.entity.CategoryEntity
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+
+    
 
 

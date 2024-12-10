@@ -17,6 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -69,24 +70,42 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         String key = (String) params.get("key");
         LambdaQueryWrapper<AttrEntity> wrapper = new LambdaQueryWrapper<>();
         //值添加这一行。判断是规格参数还是销售属性,[0-销售属性，1-基本属性，2-既是销售属性又是基本属性]
-//        wrapper.eq(AttrEntity::getAttrType,"base".equalsIgnoreCase(attrType)?1:0);
-        wrapper.eq(AttrEntity::getAttrType,"base".equalsIgnoreCase(attrType)? ProductConstant.AttrEnum.ATTR_TYPE_BASE : ProductConstant.AttrEnum.ATTR_TYPE_SALE);
+        wrapper.eq(AttrEntity::getAttrType,"base".equalsIgnoreCase(attrType)?1:0);
+//        wrapper.eq(AttrEntity::getAttrType,"base".equalsIgnoreCase(attrType)? ProductConstant.AttrEnum.ATTR_TYPE_BASE : ProductConstant.AttrEnum.ATTR_TYPE_SALE);
         if(StringUtils.isNotEmpty(key)){
             wrapper.and(obj->obj.eq(AttrEntity::getAttrId,key).or().like(AttrEntity::getAttrName,key));
         }
         //catelogId查询
-        if(catelogId!=0) wrapper.eq(AttrEntity::getCatelogId,catelogId);
+        if(catelogId!=0) {
+            wrapper.eq(AttrEntity::getCatelogId,catelogId);
+//            wrapper.eq("catelog_id",catelogId);
+        }
+
         //查询
         IPage<AttrEntity> page = this.page(
                 new Query<AttrEntity>().getPage(params),
                 wrapper
         );
         PageUtils pageUtils = new PageUtils(page);
-        //分页数据中加入当前属性的“所属分类”和“所属分组”
+
+        List<AttrEntity> allData = this.list();  // 查询所有数据
+        System.out.println("Total records in table: " + allData.size());
+        System.out.println("Total records in Ipages: " + page.getRecords().size());
+
+        /**
+         *分页数据中加入当前属性的“所属分类”和“所属分组”
+         * 报错原因，selectone可能会出现空指针异常  优化方法是使用!null判断
+         * sql优化代码
+         */
+
+        //TODO 下面的selectOne位置有bug，需要接收的是一条，但是查到的不是一条   //bug原因，属性分组关系表中只能是一对一的关系  也有可能是下面的代码原因，使用1/0即使是一对多也不会报错
+        /**
+         * wrapper.eq(AttrEntity::getAttrType,"base".equalsIgnoreCase(attrType)? ProductConstant.AttrEnum.ATTR_TYPE_BASE : ProductConstant.AttrEnum.ATTR_TYPE_SALE);
+         */
         List<AttrEntity> attrEntities = page.getRecords();
-        List<AttrRespVo> attrRespVos = attrEntities.stream().map(item->{
+        List<AttrRespVo> attrRespVos = attrEntities.stream().map(attrEntity->{
             AttrRespVo attrRespVo = new AttrRespVo();
-            BeanUtils.copyProperties(item,attrRespVo);
+            BeanUtils.copyProperties(attrEntity,attrRespVo);
             //查询“所属分类”和“所属分组”的name
             Long catelogId2 = attrRespVo.getCatelogId();
             Long attrGroupId=null;
@@ -94,13 +113,71 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
                     new LambdaQueryWrapper<AttrAttrgroupRelationEntity>().eq(AttrAttrgroupRelationEntity::getAttrId,attrRespVo.getAttrId())
             );
             if(attrAttrgroupRelationEntity!=null) attrGroupId = attrAttrgroupRelationEntity.getAttrGroupId();
+
             CategoryEntity categoryEntity = categoryDao.selectById(catelogId2);
             //没查到的对象就不能getName了，必须防止空指针异常，习惯习惯，坑点
+
             if(categoryEntity!=null) attrRespVo.setCatelogName(categoryEntity.getName());
+
+            if(attrGroupId!=null){
             AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrGroupId);
             if(attrGroupEntity!=null) attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
+            }
             return attrRespVo;
+
         }).collect(Collectors.toList());
+
+        /**
+         * sql性能优化
+         * 使用批量查询来减少数据库访问次数。
+         * 可以先通过 attrRespVo.getAttrId()
+         * 批量查询所有 AttrAttrgroupRelationEntity 记录，
+         * 然后通过 attrGroupId 批量查询 AttrGroupEntity，
+         * 从而减少每次都要进行数据库查询的开销。
+         */
+//        List<AttrEntity> attrEntities = page.getRecords();
+//        // 批量查询 AttrAttrgroupRelationEntity
+//        List<AttrAttrgroupRelationEntity> attrGroupRelations = attrAttrgroupRelationDao.selectList(
+//                new LambdaQueryWrapper<AttrAttrgroupRelationEntity>().in(AttrAttrgroupRelationEntity::getAttrId,
+//                        attrEntities.stream().map(AttrEntity::getAttrId).collect(Collectors.toList()))
+//        );
+//
+//// 生成 ID 到 AttrGroupId 的映射
+//        Map<Long, Long> attrGroupIdMap = attrGroupRelations.stream().collect(Collectors.toMap(AttrAttrgroupRelationEntity::getAttrId,
+//                AttrAttrgroupRelationEntity::getAttrGroupId));
+//
+//// 批量查询 CategoryEntity 和 AttrGroupEntity
+//        List<CategoryEntity> categories = categoryDao.selectBatchIds(attrEntities.stream().map(AttrEntity::getCatelogId).collect(Collectors.toList()));
+//        List<AttrGroupEntity> attrGroups = attrGroupDao.selectBatchIds(new ArrayList<>(attrGroupIdMap.values()));
+//
+//// 对每个 `attrRespVo` 进行赋值操作
+//        List<AttrRespVo> attrRespVos = attrEntities.stream().map(attrEntity -> {
+//            AttrRespVo attrRespVo = new AttrRespVo();
+//            BeanUtils.copyProperties(attrEntity, attrRespVo);
+//
+//            // 设置分类名称
+//            CategoryEntity categoryEntity = categories.stream().filter(c -> c.getCatId().equals(attrRespVo.getCatelogId())).findFirst().orElse(null);
+//            if (categoryEntity != null) {
+//                attrRespVo.setCatelogName(categoryEntity.getName());
+//            } else {
+//                attrRespVo.setCatelogName("未知分类");
+//            }
+//
+//            // 设置分组名称
+//            Long groupId = attrGroupIdMap.get(attrRespVo.getAttrId());
+//            if (groupId != null) {
+//                AttrGroupEntity attrGroupEntity = attrGroups.stream().filter(g -> g.getAttrGroupId().equals(groupId)).findFirst().orElse(null);
+//                if (attrGroupEntity != null) {
+//                    attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
+//                } else {
+//                    attrRespVo.setGroupName("未知分组");
+//                }
+//            }
+//
+//            return attrRespVo;
+//        }).collect(Collectors.toList());
+
+
         pageUtils.setList(attrRespVos);
         //返回分页工具对象
         return pageUtils;
@@ -268,14 +345,31 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
         AttrEntity attrEntity = this.getById(attrId);
         BeanUtils.copyProperties(attrEntity, attrRespVo);
 
+        /**
+         * 根据属性id拿到对应的分组id  attrAttrgroupRelationDao.selectOne(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrId)
+         *                         attrAttrgroupRelation.getAttrGroupId()
+         * 有分组Id之后可以拿到对应的分组名称和分类路径
+         */
+
         //设置所属分组
         AttrAttrgroupRelationEntity attrAttrgroupRelation = attrAttrgroupRelationDao.selectOne(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrId));
         if (attrAttrgroupRelation != null){
             attrRespVo.setAttrGroupId(attrAttrgroupRelation.getAttrGroupId());
         }
+        //设置分组名称
+        AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrAttrgroupRelation.getAttrGroupId());
+
+        if(attrGroupEntity != null){
+            attrRespVo.setAttrGroupId(attrGroupEntity.getAttrGroupId());
+            attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
+        }
         //设置所属分类路径
         Long[] catelogPath = categoryService.findCatelogPath(attrEntity.getCatelogId());
         attrRespVo.setCatelogPath(catelogPath);
+
+        CategoryEntity categoryEntity = categoryDao.selectById(attrEntity.getCatelogId());
+        if(categoryEntity != null){
+        attrRespVo.setCatelogName(categoryEntity.getName());}
 
         return attrRespVo;
     }

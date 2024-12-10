@@ -222,8 +222,9 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
      * 修改属性时，同步修改与属性分组关联关系
      * @param attrVo
      */
-    @Override
+
     @Transactional
+    @Override
     public void updateAttr(AttrVo attrVo) {
         //先修改属性
         this.updateById(attrVo);
@@ -353,16 +354,30 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
 
         //设置所属分组
         AttrAttrgroupRelationEntity attrAttrgroupRelation = attrAttrgroupRelationDao.selectOne(new QueryWrapper<AttrAttrgroupRelationEntity>().eq("attr_id", attrId));
+//        if (attrAttrgroupRelation != null){
+//            attrRespVo.setAttrGroupId(attrAttrgroupRelation.getAttrGroupId());
+//        }
+//        //设置分组名称
+//        AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrAttrgroupRelation.getAttrGroupId());
+//
+//        if(attrGroupEntity != null){
+//            attrRespVo.setAttrGroupId(attrGroupEntity.getAttrGroupId());
+//            attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
+//        }
+
         if (attrAttrgroupRelation != null){
             attrRespVo.setAttrGroupId(attrAttrgroupRelation.getAttrGroupId());
-        }
-        //设置分组名称
-        AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrAttrgroupRelation.getAttrGroupId());
+            //设置分组名称
+            AttrGroupEntity attrGroupEntity = attrGroupDao.selectById(attrAttrgroupRelation.getAttrGroupId());
 
-        if(attrGroupEntity != null){
-            attrRespVo.setAttrGroupId(attrGroupEntity.getAttrGroupId());
-            attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
+            if(attrGroupEntity != null){
+                attrRespVo.setAttrGroupId(attrGroupEntity.getAttrGroupId());
+                attrRespVo.setGroupName(attrGroupEntity.getAttrGroupName());
+            }
         }
+
+
+
         //设置所属分类路径
         Long[] catelogPath = categoryService.findCatelogPath(attrEntity.getCatelogId());
         attrRespVo.setCatelogPath(catelogPath);

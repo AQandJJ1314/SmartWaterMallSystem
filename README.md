@@ -285,6 +285,17 @@ PageUtils page = attrGroupService.queryPage(params,catlogId);
 
 解决前端级联菜单渲染问题： com.atcode.watermall.product.entity.CategoryEntity
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+com.atcode.watermall.product.service.impl.AttrServiceImpl
+        /**
+         *分页数据中加入当前属性的“所属分类”和“所属分组”
+         * 报错原因，selectone可能会出现空指针异常  优化方法是使用!null判断
+         * sql优化代码
+         */
+
+        //TODO 下面的selectOne位置有bug，需要接收的是一条，但是查到的不是一条   //bug原因，属性分组关系表中只能是一对一的关系  也有可能是下面的代码原因，使用1/0即使是一对多也不会报错
+        /**
+         * wrapper.eq(AttrEntity::getAttrType,"base".equalsIgnoreCase(attrType)? ProductConstant.AttrEnum.ATTR_TYPE_BASE : ProductConstant.AttrEnum.ATTR_TYPE_SALE);
+         */
 
     
 

@@ -65,6 +65,16 @@ public class SpuInfoController {
         return R.ok();
     }
 
+//    /**
+//     * 保存
+//     */
+//    @RequestMapping("/save")
+//    public R save(@RequestBody SpuSaveVo spuSaveVo){
+//        spuInfoService.saveSpuInfo(spuSaveVo);
+//
+//        return R.ok();
+//    }
+
     /**
      * 修改
      */

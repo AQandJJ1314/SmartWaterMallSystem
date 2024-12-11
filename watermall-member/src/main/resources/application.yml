@@ -20,3 +20,7 @@ mybatis-plus:
 
 server:
   port: 8000
+
+logging:
+  level:
+    com.atcode.watermall.member: debug

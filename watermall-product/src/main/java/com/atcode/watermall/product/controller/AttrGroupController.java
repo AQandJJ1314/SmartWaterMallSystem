@@ -10,6 +10,7 @@ import com.atcode.watermall.product.service.AttrAttrgroupRelationService;
 import com.atcode.watermall.product.service.AttrService;
 import com.atcode.watermall.product.service.CategoryService;
 import com.atcode.watermall.product.vo.AttrGroupRelationVo;
+import com.atcode.watermall.product.vo.AttrGroupWithAttrsVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -134,6 +135,21 @@ public class AttrGroupController {
     public R attrRelation(@RequestBody List<AttrGroupRelationVo> vos){
         attrAttrgroupRelationService.saveBatch(vos);
         return R.ok();
+    }
+
+
+    /**
+     * 获取当前分类下的分组及其关联的属性
+     * @param catelogId
+     * @return
+     */
+    @GetMapping("/{catelogId}/withattr")
+    public R getAttrGroupWithAttrs(@PathVariable("catelogId") Long catelogId){
+        //1、查出当前分类下的所有属性分组
+        //2、查出每个属性分组的所有属性
+        List<AttrGroupWithAttrsVo> vos = attrGroupService.getAttrGroupWithAttrsByCatelogId(catelogId);
+        return R.ok().put("data", vos);
+
     }
 
 }

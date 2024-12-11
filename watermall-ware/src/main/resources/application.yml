@@ -25,3 +25,6 @@ server:
 logging:
   level:
     com.atcode.watermall.ware: debug
+
+#  jackson:
+#    date-format: yyyy-MM-dd HH:mm:ss

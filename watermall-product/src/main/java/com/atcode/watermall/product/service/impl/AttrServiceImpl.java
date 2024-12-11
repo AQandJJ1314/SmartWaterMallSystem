@@ -259,7 +259,17 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
             return entity.getAttrId();
         }).collect(Collectors.toList());
 
-        List<AttrEntity> attrEntities = this.baseMapper.selectBatchIds(attrIds);
+//        List<AttrEntity> attrEntities = this.baseMapper.selectList(new QueryWrapper<AttrEntity>().eq("attr_id",attrIds));
+//        List<AttrEntity> attrEntities = this.baseMapper.selectBatchIds(attrIds);
+        /**
+         * 每个id查一次表
+         */
+        //TODO 可以修改为查到关系表的所有内容，然后再和group_id进行匹配
+        List<AttrEntity> attrEntities = attrIds.stream().map((attrId) -> {
+            AttrEntity attrEntity = new AttrEntity();
+            attrEntity = this.baseMapper.selectById(attrId);
+            return attrEntity;
+        }).collect(Collectors.toList());
 
         return attrEntities;
     }

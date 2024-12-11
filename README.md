@@ -296,7 +296,12 @@ com.atcode.watermall.product.service.impl.AttrServiceImpl
         /**
          * wrapper.eq(AttrEntity::getAttrType,"base".equalsIgnoreCase(attrType)? ProductConstant.AttrEnum.ATTR_TYPE_BASE : ProductConstant.AttrEnum.ATTR_TYPE_SALE);
          */
-
-    
+位置:com.atcode.watermall.product.controller.CategoryBrandRelationController
+    /**
+     * 获取当前分类关联的所有品牌
+     * 1、 Controller: 处理请求，接受和校验数据
+     * 2、Service接受controller传来的数据，进行业务处理
+     * 3、Controller接受Service处理完的数据，封装成页面指定的vo
+     */
 
 

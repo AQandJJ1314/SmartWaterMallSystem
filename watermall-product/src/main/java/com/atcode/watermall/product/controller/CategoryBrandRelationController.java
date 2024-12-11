@@ -66,6 +66,7 @@ public class CategoryBrandRelationController {
 //遍历拷贝vos到brandVo
         List<BrandVo> collect = vos.stream().map(item -> {
             BrandVo brandVo = new BrandVo();
+            //此处的属性名称不一致因此不能使用BeanUtis.copy()
             brandVo.setBrandId(item.getBrandId());
             brandVo.setBrandName(item.getName());
 

@@ -84,8 +84,8 @@ public class CategoryBrandRelationServiceImpl extends ServiceImpl<CategoryBrandR
         List<CategoryBrandRelationEntity> catelogId = this.baseMapper.selectList(new QueryWrapper<CategoryBrandRelationEntity>().eq("catelog_id", catId));
         List<BrandEntity> collect = catelogId.stream().map(item -> {
             Long brandId = item.getBrandId();
-            BrandEntity byId = brandService.getById(brandId);
-            return byId;
+            BrandEntity brandEntity = brandService.getById(brandId);
+            return brandEntity;
         }).collect(Collectors.toList());
         return collect;
     }

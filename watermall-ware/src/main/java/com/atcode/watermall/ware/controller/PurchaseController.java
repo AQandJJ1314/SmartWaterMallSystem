@@ -73,7 +73,6 @@ public class PurchaseController {
    // @RequiresPermissions("ware:purchase:save")
     public R save(@RequestBody PurchaseEntity purchase){
 		purchaseService.save(purchase);
-
         return R.ok();
     }
 
@@ -119,7 +118,7 @@ public class PurchaseController {
      * 此时的采购单应该为新建或已分配状态，在采购人员领取后采购单的状态变为已领取，
      * 采购需求的状态变为正在采购
      */
-    //TODO 该接口未测试
+    //TODO 该接口未测试  已测试
     @PostMapping("/received")
     //@RequiresPermissions("ware:purchase:list")
     public R received(@RequestBody List<Long> ids){

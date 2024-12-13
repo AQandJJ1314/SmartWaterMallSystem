@@ -303,5 +303,39 @@ com.atcode.watermall.product.service.impl.AttrServiceImpl
      * 2、Service接受controller传来的数据，进行业务处理
      * 3、Controller接受Service处理完的数据，封装成页面指定的vo
      */
+.common模块创建to，用于不同服务间传数据
+
+TO:Transfer Object 数据传输对象
+在应用程序不同关系之间传输的对象。
+
+
+
+测试领取采购单的接口
+POST http://localhost:88/api//ware/purchase/received
+Content-Type: application/json
+
+[3]
+
+参数为采购单id
+<> 2024-12-12T163748.200.json
+
+
+
+测试采购完成的接口
+POST http://localhost:88/api/ware/purchase/done
+Content-Type: application/json
+
+{
+"id": 3,
+"items": [
+{"itemId":3,"status":3,"reason":"完成"},
+{"itemId":4,"status":3,"reason":"完成"}
+]
+}
+
+
+itemid为采购需求的id
+<> 2024-12-13T152023.200.json
+
 
 

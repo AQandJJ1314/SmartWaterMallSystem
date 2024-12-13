@@ -1,5 +1,6 @@
 package com.atcode.watermall.product.entity;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 
@@ -9,7 +10,7 @@ import lombok.Data;
 
 /**
  * spu信息介绍
- * 
+ *
  * @author JiangCheng
  * @email JiangCheng@watermail.com
  * @date 2024-11-25 19:53:42
@@ -22,7 +23,7 @@ public class SpuInfoDescEntity implements Serializable {
 	/**
 	 * 商品id
 	 */
-	@TableId
+	@TableId(type = IdType.INPUT)
 	private Long spuId;
 	/**
 	 * 商品介绍

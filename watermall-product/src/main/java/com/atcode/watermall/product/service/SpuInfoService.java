@@ -1,5 +1,6 @@
 package com.atcode.watermall.product.service;
 
+import com.atcode.watermall.product.vo.SpuSaveVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atcode.common.utils.PageUtils;
 import com.atcode.watermall.product.entity.SpuInfoEntity;
@@ -16,5 +17,7 @@ import java.util.Map;
 public interface SpuInfoService extends IService<SpuInfoEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    void saveSpuInfo(SpuSaveVo spuSaveVo);
 }
 

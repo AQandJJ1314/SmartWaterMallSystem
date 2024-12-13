@@ -4,6 +4,7 @@ import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * JSR303
@@ -13,12 +14,17 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
  */
 
 @MapperScan("com.atcode.watermall.product.dao")
+
+@EnableFeignClients(basePackages = "com.atcode.watermall.product.feign")
+
 @EnableDiscoveryClient
 @SpringBootApplication
 public class WatermallProductApplication {
 
     public static void main(String[] args) {
         SpringApplication.run(WatermallProductApplication.class, args);
+        System.err.println("商品模块已启动");
+
     }
 
 }

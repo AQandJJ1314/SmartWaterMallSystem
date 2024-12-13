@@ -1,5 +1,6 @@
 package com.atcode.watermall.coupon.service;
 
+import com.atcode.common.to.SkuReductionTo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atcode.common.utils.PageUtils;
 import com.atcode.watermall.coupon.entity.SkuFullReductionEntity;
@@ -16,5 +17,7 @@ import java.util.Map;
 public interface SkuFullReductionService extends IService<SkuFullReductionEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    void saveSkuReduction(SkuReductionTo skuReductionTo);
 }
 

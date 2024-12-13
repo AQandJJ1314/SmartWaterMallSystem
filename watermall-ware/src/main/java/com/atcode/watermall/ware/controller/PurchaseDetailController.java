@@ -19,7 +19,7 @@ import com.atcode.common.utils.R;
 
 
 /**
- * 
+ *
  *
  * @author JiangCheng
  * @email JiangCheng@watermail.com
@@ -56,11 +56,15 @@ public class PurchaseDetailController {
 
     /**
      * 保存
+     * 新的方法增加了拿到product服务的采购金额，根据传入的skuId
      */
     @RequestMapping("/save")
    // @RequiresPermissions("ware:purchasedetail:save")
     public R save(@RequestBody PurchaseDetailEntity purchaseDetail){
 		purchaseDetailService.save(purchaseDetail);
+        //TODO 调整获取价格总是有bug，拿不到price，后续修改
+//		purchaseDetailService.saveWithProduct(purchaseDetail);
+
 
         return R.ok();
     }

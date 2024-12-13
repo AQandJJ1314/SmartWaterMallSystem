@@ -35,6 +35,13 @@ spring:
             - Path=/api/ware/**
           filters:
             - RewritePath=/api/(?<segment>.*),/$\{segment}
+        #优惠券模块路由
+        - id: ware_route
+          uri: lb://watermall-coupon
+          predicates:
+            - Path=/api/coupon/**
+          filters:
+            - RewritePath=/api/(?<segment>.*),/$\{segment}
         # 路由id，自定义，只要唯一即可
         - id: admin_route
           # uri路由的目标地址。lb就是负载均衡，后面跟服务名称。

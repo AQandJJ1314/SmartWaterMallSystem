@@ -16,6 +16,12 @@
         <spring-cloud.version>2020.0.6</spring-cloud.version>
     </properties>
     <dependencies>
+
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-loadbalancer</artifactId>
+            <version>3.1.4</version>
+        </dependency>
           <!-- mybatis-plus公共依赖-->
         <dependency>
             <groupId>com.baomidou</groupId>

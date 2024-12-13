@@ -26,6 +26,12 @@ public class R extends HashMap<String, Object> {
 		put("msg", "success");
 	}
 
+//	public Integer getCode(){
+//		return Integer.parseInt((String) this.get("code"));
+//	}
+public Integer getCode(){
+	return (Integer) this.get("code");
+}
 	public static R error() {
 		return error(HttpStatus.SC_INTERNAL_SERVER_ERROR, "未知异常，请联系管理员");
 	}

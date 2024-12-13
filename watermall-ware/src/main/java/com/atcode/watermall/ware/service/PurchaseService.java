@@ -27,5 +27,6 @@ public interface PurchaseService extends IService<PurchaseEntity> {
     void received(List<Long> ids);
 
     void done(PurchaseDoneVo vo);
+
 }
 

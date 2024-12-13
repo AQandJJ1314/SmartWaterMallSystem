@@ -13,6 +13,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -131,21 +132,21 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
         List<PurchaseItemDoneVo> items = vo.getItems();
         List<PurchaseDetailEntity> updateList = new ArrayList<>();
         boolean flag = true;
-        for (PurchaseItemDoneVo item : items){
+        for (PurchaseItemDoneVo item : items) {
             Long detailId = item.getItemId();
             PurchaseDetailEntity detailEntity = purchaseDetailService.getById(detailId);
+            if (detailEntity != null) {
             detailEntity.setStatus(item.getStatus());
             //采购需求失败
-            if (item.getStatus() == WareConstant.PurchaseDetailStatusEnum.HASERROR.getCode()){
+            if (item.getStatus() == WareConstant.PurchaseDetailStatusEnum.HASERROR.getCode()) {
                 flag = false;
-            }else {
+            } else {
                 //3、根据采购需求的状态，更新库存
                 // sku_id, sku_num, ware_id
                 // sku_id, ware_id, stock sku_name(调用远程服务获取), stock_locked(先获取已经有的库存，再加上新购买的数量)
                 String skuName = "";
                 try {
                     R info = productFeignService.info(detailEntity.getSkuId());
-                    //TODO R的类型？？？？
                     if(info.getCode() == 0){
                         Map<String,Object> data=(Map<String,Object>)info.get("skuInfo");
                         skuName = (String) data.get("skuName");
@@ -158,12 +159,16 @@ public class PurchaseServiceImpl extends ServiceImpl<PurchaseDao, PurchaseEntity
             }
             updateList.add(detailEntity);
         }
-        //保存采购需求
-        purchaseDetailService.updateBatchById(updateList);
-        //2、根据采购需求的状态，更新采购单的状态
-        PurchaseEntity purchaseEntity = new PurchaseEntity();
-        purchaseEntity.setId(vo.getId());
-        purchaseEntity.setStatus(flag ? WareConstant.PurchaseStatusEnum.FINISH.getCode() : WareConstant.PurchaseStatusEnum.HASERROR.getCode());
-        this.updateById(purchaseEntity);
+            }
+            //保存采购需求
+            purchaseDetailService.updateBatchById(updateList);
+            //2、根据采购需求的状态，更新采购单的状态
+            PurchaseEntity purchaseEntity = new PurchaseEntity();
+            purchaseEntity.setId(vo.getId());
+            purchaseEntity.setStatus(flag ? WareConstant.PurchaseStatusEnum.FINISH.getCode() : WareConstant.PurchaseStatusEnum.HASERROR.getCode());
+            this.updateById(purchaseEntity);
+
     }
+
+
 }

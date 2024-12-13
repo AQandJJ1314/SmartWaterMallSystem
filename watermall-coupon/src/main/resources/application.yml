@@ -1,23 +1,23 @@
-#spring:
-#  datasource:
-#    username: root
-#    password: 123456
-#    url: jdbc:mysql://localhost:3306/gulimall_sms?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
-#    driver-class-name: com.mysql.cj.jdbc.Driver
-#  cloud:
-#    nacos:
-#      discovery:
-#        server-addr: 127.0.0.1:8848
+spring:
+  datasource:
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/gulimall_sms?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848
 #        namespace: e9fa5a5c-6689-4397-b9b7-e054e46c52c0
 #        group: dev
-#  application:
-#    name: watermall-coupon
-#
-#mybatis-plus:
-#  mapper-locations: classpath*:/mapper/**/*.xml
-#  global-config:
-#    db-config:
-#      id-type: auto
+  application:
+    name: watermall-coupon
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  global-config:
+    db-config:
+      id-type: auto
 
 #上述内容在nacos也配置了，防止迁移之后无nacos，所以这里也做配置
 server:

@@ -1,6 +1,7 @@
 package com.atcode.watermall.product.service.impl;
 
 import com.atcode.watermall.product.service.CategoryBrandRelationService;
+import com.atcode.watermall.product.vo.Catalog2Vo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -92,6 +93,52 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         this.updateById(category);
         categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
     }
+
+    @Override
+    public List<CategoryEntity> getLevel1Categorys() {
+        List<CategoryEntity> categoryEntities = this.baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
+        return categoryEntities;
+    }
+
+    @Override
+    public Map<String, List<Catalog2Vo>> getCatalogJson() {
+        // 一次性获取所有 数据
+        List<CategoryEntity> selectList = baseMapper.selectList(null);
+        System.out.println("调用了 getCatalogJson  查询了数据库........【三级分类】");
+        // 1）、所有1级分类
+        List<CategoryEntity> level1Categorys = getParent_cid(selectList, 0L);
+
+        // 2）、封装数据
+        Map<String, List<Catalog2Vo>> collect = level1Categorys.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), level1 -> {
+            // 查到当前1级分类的2级分类
+            List<CategoryEntity> category2level = getParent_cid(selectList, level1.getCatId());
+            List<Catalog2Vo> catalog2Vos = null;
+            if (category2level != null) {
+                catalog2Vos = category2level.stream().map(level12 -> {
+                    // 查询当前2级分类的3级分类
+                    List<CategoryEntity> category3level = getParent_cid(selectList, level12.getCatId());
+                    List<Catalog2Vo.Catalog3Vo> catalog3Vos = null;
+                    if (category3level != null) {
+                        catalog3Vos = category3level.stream().map(level13 -> {
+                            return new Catalog2Vo.Catalog3Vo(level12.getCatId().toString(), level13.getCatId().toString(), level13.getName());
+                        }).collect(Collectors.toList());
+                    }
+                    return new Catalog2Vo(level1.getCatId().toString(), catalog3Vos, level12.getCatId().toString(), level12.getName());
+                }).collect(Collectors.toList());
+            }
+            return catalog2Vos;
+        }));
+        return collect;
+    }
+
+    /**
+     * 查询出父ID为 parent_cid的List集合
+     */
+    private List<CategoryEntity> getParent_cid(List<CategoryEntity> selectList, Long parent_cid) {
+        return selectList.stream().filter(item -> item.getParentCid() == parent_cid).collect(Collectors.toList());
+        //return baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", level.getCatId()));
+    }
+
     /**
      * 递归查询父节点id
      * @param paths

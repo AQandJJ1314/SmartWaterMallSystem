@@ -14,6 +14,11 @@ spring:
   application:
     name: watermall-product
 
+# 关闭thymeleaf缓存，以便于修改代码后刷新页面能看出修改
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

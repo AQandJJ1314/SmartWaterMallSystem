@@ -296,7 +296,7 @@ com.atcode.watermall.product.service.impl.AttrServiceImpl
         /**
          * wrapper.eq(AttrEntity::getAttrType,"base".equalsIgnoreCase(attrType)? ProductConstant.AttrEnum.ATTR_TYPE_BASE : ProductConstant.AttrEnum.ATTR_TYPE_SALE);
          */
-位置:com.atcode.watermall.product.controller.CategoryBrandRelationController
+位置:com.atcode.watermall.product.app.CategoryBrandRelationController
     /**
      * 获取当前分类关联的所有品牌
      * 1、 Controller: 处理请求，接受和校验数据
@@ -337,5 +337,20 @@ Content-Type: application/json
 itemid为采购需求的id
 <> 2024-12-13T152023.200.json
 
+
+商城首页 
+    模板引擎 thymeleaf-stater 关闭缓存，配置默认启动扫描路径
+    静态资源在static文件夹下，可以通过路径直接访问到
+    页面在templates文件夹下，也可以直接访问
+    SpringBoot访问项目的时候默认会访问Index
+  不重启服务器的情况下更新数据
+    1.引入devtool
+    <dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
+        </dependency>
+    2.重新编译当前页面ctrl+shift+F9
+    
 
 

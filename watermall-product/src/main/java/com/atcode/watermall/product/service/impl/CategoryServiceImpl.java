@@ -1,8 +1,12 @@
 package com.atcode.watermall.product.service.impl;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.atcode.watermall.product.service.CategoryBrandRelationService;
 import com.atcode.watermall.product.vo.Catalog2Vo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,6 +25,7 @@ import com.atcode.watermall.product.entity.CategoryEntity;
 import com.atcode.watermall.product.service.CategoryService;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 
 @EnableTransactionManagement
@@ -31,9 +36,11 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 //    @Autowired
 //    CategoryDao categoryDao;
 
-
+    //连接redis所用
     @Autowired
-    CategoryBrandRelationService categoryBrandRelationService;
+    private StringRedisTemplate stringRedisTemplate;
+    @Autowired
+    private CategoryBrandRelationService categoryBrandRelationService;
 
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
@@ -102,6 +109,29 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     @Override
     public Map<String, List<Catalog2Vo>> getCatalogJson() {
+        //给缓存中放json字符串，拿出的json字符串还要逆转成能用的对象类型 ‘序列化与反序列化’
+
+        //1.加入缓存逻辑   缓存中放的数据是json字符串
+        //json跨语言跨平台兼容
+        String catalogJson = stringRedisTemplate.opsForValue().get("catalogJson");
+        if(!StringUtils.isEmpty(catalogJson)){
+            //2.缓存中没有，查询数据库
+            Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDB();
+            //3.查到的数据再放入缓存 将对象转为json放在缓存中
+            String s = JSON.toJSONString(catalogJsonFromDB);
+            stringRedisTemplate.opsForValue().set("catalogJson",s);
+        }
+
+        //转为指定的对象
+        Map<String, List<Catalog2Vo>> result = JSON.parseObject(catalogJson,new TypeReference<Map<String, List<Catalog2Vo>>>(){});
+        return result;
+    }
+
+    //从数据库查询并封装分类数据
+    public Map<String, List<Catalog2Vo>> getCatalogJsonFromDB() {
+        /**
+         * 1.将数据库的多次查询变成一次
+         */
         // 一次性获取所有 数据
         List<CategoryEntity> selectList = baseMapper.selectList(null);
         System.out.println("调用了 getCatalogJson  查询了数据库........【三级分类】");

@@ -54,6 +54,14 @@ spring:
             #路径重写。逗号左边是原路径，右边是重写后的路径
             - RewritePath=/api/(?<segment>.*),/renren-fast/$\{segment}
             # 默认规则， 请求过来：http://localhost:88/api/captcha.jpg   转发-->  http://renren-fast:8080/renren-fast/captcha.jpg
+              # 域名映射只能放在最后面，否则会覆盖上面的api路径
+              # 例如我们访问product的api路径，优先匹配到这个的话就会去直接找product
+              # 不会再路径重写了
+        - id: watermall_host_route
+          uri: lb://watermall-product
+          predicates:
+             - Host=**.watermall.com
+
   application:
     name: watermall-gateway
 #应用名称在nacos也配置了，防止迁移之后无nacos，所以这里也做配置

@@ -7,9 +7,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 @SpringBootTest
 class WatermallProductApplicationTests {
@@ -20,11 +23,27 @@ class WatermallProductApplicationTests {
 
     @Autowired
     CategoryService categoryService;
+
+    @Autowired
+    StringRedisTemplate redisTemplate;
     @Test
     public void testPathCatelog(){
         Long [] catelogPath= categoryService.findCatelogPath(165L);
 
         System.out.println(catelogPath.length);
+
+    }
+
+
+
+    @Test
+    public void testRedis() {
+        ValueOperations<String, String> ops = redisTemplate.opsForValue();
+        // 保存
+        ops.set("hello", "world_" + UUID.randomUUID().toString());
+        // 查询
+        String hello = ops.get("hello");
+        System.out.println("保存的数据是"+hello);
 
     }
     @Test

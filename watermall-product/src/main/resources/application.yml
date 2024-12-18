@@ -19,17 +19,20 @@ spring:
     cache: false
     prefix: classpath:/templates/
     suffix: .html
+  redis:
+    host: 127.0.0.1
+    port: 6379
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml
   global-config:
     db-config:
       id-type: auto
-
 server:
   port: 12000
 
 
 logging:
   level:
+#    com.atcode.watermall.product: error
     com.atcode.watermall.product: debug

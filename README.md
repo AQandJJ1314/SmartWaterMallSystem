@@ -517,3 +517,48 @@ lettuce的bug导致netty堆外内存溢出 -Xmx300m；netty如果没有指定堆
 
 解决方法：使用更大范围的锁，锁住存入缓存的这个操作
 
+位置：com.atcode.watermall.product.service.impl.CategoryServiceImpl
+  分布式锁的业务代码，但是仍然存在问题，如果执行过程中出现异常会导致无法删锁，其余线程全部等待 
+  如果使用try catch finally处理，如果正常执行但是机器断电，也会出现锁无法释放问题
+    解决方案，设置自动过期时间     stringRedisTemplate.expire("lock",30,TimeUnit.SECONDS);
+   //1.占用分布式锁 redis
+   Boolean lock = stringRedisTemplate.opsForValue().setIfAbsent("lock", "111");
+    if(lock){
+     //加锁成功....执行业务
+      Map<String, List<Catalog2Vo>> dataFromDb = getDataFromDb();
+      //释放锁
+       stringRedisTemplate.delete("lock");
+        return dataFromDb;
+         }else {
+        //加锁失败....重试
+        //休眠100mm重试
+         return getCatalogJsonFromDBWithRedisLock();//自旋的方式等待 
+       }
+
+   如果拿到锁之后刚好机器断电导致未设置上过期时间，同样会导致死锁  解决方案：使得加锁和设置过期时间作为一个原子命令，也就是同步的
+   Boolean lock = stringRedisTemplate.opsForValue().setIfAbsent("lock", "111",300,TimeUnit.SECONDS);
+   
+   加锁问题解决之后删锁依然可能会存在问题
+   如果由于业务时间很长导致设置的过期时间已经过期了，直接删除(按照key删)，可能会导致删除别人正在持有的锁
+   解决方案：占锁的时候，值指定为uuid，每个线程匹配的是自己的锁才删除
+   String uuid = UUID.randomUUID().toString();
+   Boolean lock = stringRedisTemplate.opsForValue().setIfAbsent("lock", uuid,300,TimeUnit.SECONDS);
+   //判断是自己的锁才可以删除
+   if(uuid.equals(lockValue)){ stringRedisTemplate.delete("lock"); } 
+   依然存在问题：如果在请求到redis判断lock的途中 锁过期了，假如是10s过期，9.5的时候请求，请求到了返回的途中，redis的lock过期了并且有其他线程的lock进入，此时删除的就不是自己的锁
+   也就是说返回的值是当前线程的值没错，但是实际上redis中的值已经变了，所以此时删除就会出现问题
+ 
+   解决办法：使得删锁的两步变成原子操作  获取值对比+对比成功删除  需要成为原子操作  使用redis+Lua脚本完成  代码：
+     
+    String luaScript = "if redis.call('get',KEYS[1]) == ARGV[1]\n" +
+                    "then\n" +
+                    "    return redis.call('del',KEYS[1])\n" +
+                    "else\n" +
+                    "    return 0\n" +
+                    "end";
+            // 删除锁
+            Long lock1 = stringRedisTemplate.execute(
+                    new DefaultRedisScript<Long>(luaScript, Long.class),
+                    Arrays.asList("lock"), uuid);    //把key和value传给lua脚本
+
+总结：redis做分布式锁的两个核心是加锁和解锁都保证原子性

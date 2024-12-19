@@ -7,11 +7,10 @@ import com.atcode.watermall.product.service.CategoryBrandRelationService;
 import com.atcode.watermall.product.vo.Catalog2Vo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -136,10 +135,12 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         if(StringUtils.isEmpty(catalogJson)){
             System.out.println("缓存不命中....查询数据库...");
             //2.缓存中没有，查询数据库
-            Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDB();
-//            //3.查到的数据再放入缓存 将对象转为json放在缓存中
-//            String s = JSON.toJSONString(catalogJsonFromDB);
-//            stringRedisTemplate.opsForValue().set("catalogJson",s,1, TimeUnit.DAYS);
+            Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDBWithRedisLock();
+            /**
+             *         //3.查到的数据再放入缓存 将对象转为json放在缓存中
+             *             // String s = JSON.toJSONString(catalogJsonFromDB);
+             *             //   stringRedisTemplate.opsForValue().set("catalogJson",s,1, TimeUnit.DAYS);
+             */
         }
         System.out.println("缓存命中....直接返回结果.....");
         //转为指定的对象
@@ -147,58 +148,102 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return result;
     }
 
+    public Map<String, List<Catalog2Vo>> getCatalogJsonFromDBWithRedisLock() {
+
+        //1.占用分布式锁 redis 同时设置过期时间，避免因程序异常或者服务器宕机导致的死锁问题
+        String uuid = UUID.randomUUID().toString();
+        Boolean lock = stringRedisTemplate.opsForValue().setIfAbsent("lock", uuid,300,TimeUnit.SECONDS);
+        if(lock){
+            //加锁成功....执行业务
+            //设置过期时间
+//            stringRedisTemplate.expire("lock",30,TimeUnit.SECONDS);
+            Map<String, List<Catalog2Vo>> dataFromDb = getDataFromDb();
+            //释放锁
+//            stringRedisTemplate.delete("lock");
+            //获取值对比+对比成功删除  需要成为原子操作 使用Lua脚本解锁
+//            String lockValue = stringRedisTemplate.opsForValue().get("lock");
+//            //判断是自己的锁才可以删除
+//            if(uuid.equals(lockValue)){stringRedisTemplate.delete("lock");}
+            // 2、查询UUID是否是自己，是自己的lock就删除
+            // 查询+删除 必须是原子操作：lua脚本解锁
+            String luaScript = "if redis.call('get',KEYS[1]) == ARGV[1]\n" +
+                    "then\n" +
+                    "    return redis.call('del',KEYS[1])\n" +
+                    "else\n" +
+                    "    return 0\n" +
+                    "end";
+            // 删除锁
+            Long lock1 = stringRedisTemplate.execute(
+                    new DefaultRedisScript<Long>(luaScript, Long.class),
+                    Arrays.asList("lock"), uuid);    //把key和value传给lua脚本
+
+
+
+
+            return dataFromDb;
+        }else {
+            //加锁失败....重试
+            //休眠100mm重试
+            return getCatalogJsonFromDBWithRedisLock();//自旋的方式等待
+        }
+
+    }
+
+    private Map<String, List<Catalog2Vo>> getDataFromDb() {
+        String catalogJson = stringRedisTemplate.opsForValue().get("catalogJson");
+        if(!StringUtils.isEmpty(catalogJson)){
+            //缓存不为null，直接返回
+            Map<String, List<Catalog2Vo>> result = JSON.parseObject(catalogJson,new TypeReference<Map<String, List<Catalog2Vo>>>(){});
+            return result;
+        }
+
+        System.out.println("查询了数据库.....");
+        /**
+         * 1.将数据库的多次查询变成一次
+         */
+        // 一次性获取所有 数据
+        List<CategoryEntity> selectList = baseMapper.selectList(null);
+        // 1）、所有1级分类
+        List<CategoryEntity> level1Categorys = getParent_cid(selectList, 0L);
+
+        // 2）、封装数据
+        Map<String, List<Catalog2Vo>> collect = level1Categorys.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), level1 -> {
+            // 查到当前1级分类的2级分类
+            List<CategoryEntity> category2level = getParent_cid(selectList, level1.getCatId());
+            List<Catalog2Vo> catalog2Vos = null;
+            if (category2level != null) {
+                catalog2Vos = category2level.stream().map(level12 -> {
+                    // 查询当前2级分类的3级分类
+                    List<CategoryEntity> category3level = getParent_cid(selectList, level12.getCatId());
+                    List<Catalog2Vo.Catalog3Vo> catalog3Vos = null;
+                    if (category3level != null) {
+                        catalog3Vos = category3level.stream().map(level13 -> {
+                            return new Catalog2Vo.Catalog3Vo(level12.getCatId().toString(), level13.getCatId().toString(), level13.getName());
+                        }).collect(Collectors.toList());
+                    }
+                    return new Catalog2Vo(level1.getCatId().toString(), catalog3Vos, level12.getCatId().toString(), level12.getName());
+                }).collect(Collectors.toList());
+            }
+            return catalog2Vos;
+        }));
+
+
+        //3.查到的数据再放入缓存 将对象转为json放在缓存中
+        String s = JSON.toJSONString(collect);
+        stringRedisTemplate.opsForValue().set("catalogJson",s,1, TimeUnit.DAYS);
+
+        return collect;
+    }
+
     //从数据库查询并封装分类数据
-    public Map<String, List<Catalog2Vo>> getCatalogJsonFromDB() {
+    public Map<String, List<Catalog2Vo>> getCatalogJsonFromDBWithLocalLock() {
         //只要是同一把锁，就能锁住需要这个锁的所有线程
         //1、 synchronized (this) SpringBoot所有组件在容器中都是单例的
         //TODO 本地（进程）锁，synchronized,JUC(Lock)只锁当前的进程的资源（实例对象/方法） ，分布式情况下想要锁住所有就得用分布式锁
 
         synchronized (this) {
             //得到锁以后再去缓存中确定一次，如果没有，才需要继续查询
-            String catalogJson = stringRedisTemplate.opsForValue().get("catalogJson");
-            if(!StringUtils.isEmpty(catalogJson)){
-                //缓存不为null，直接返回
-                Map<String, List<Catalog2Vo>> result = JSON.parseObject(catalogJson,new TypeReference<Map<String, List<Catalog2Vo>>>(){});
-                return result;
-            }
-
-            System.out.println("查询了数据库.....");
-            /**
-             * 1.将数据库的多次查询变成一次
-             */
-            // 一次性获取所有 数据
-            List<CategoryEntity> selectList = baseMapper.selectList(null);
-//            System.out.println("调用了 getCatalogJson  查询了数据库........【三级分类】");
-            // 1）、所有1级分类
-            List<CategoryEntity> level1Categorys = getParent_cid(selectList, 0L);
-
-            // 2）、封装数据
-            Map<String, List<Catalog2Vo>> collect = level1Categorys.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), level1 -> {
-                // 查到当前1级分类的2级分类
-                List<CategoryEntity> category2level = getParent_cid(selectList, level1.getCatId());
-                List<Catalog2Vo> catalog2Vos = null;
-                if (category2level != null) {
-                    catalog2Vos = category2level.stream().map(level12 -> {
-                        // 查询当前2级分类的3级分类
-                        List<CategoryEntity> category3level = getParent_cid(selectList, level12.getCatId());
-                        List<Catalog2Vo.Catalog3Vo> catalog3Vos = null;
-                        if (category3level != null) {
-                            catalog3Vos = category3level.stream().map(level13 -> {
-                                return new Catalog2Vo.Catalog3Vo(level12.getCatId().toString(), level13.getCatId().toString(), level13.getName());
-                            }).collect(Collectors.toList());
-                        }
-                        return new Catalog2Vo(level1.getCatId().toString(), catalog3Vos, level12.getCatId().toString(), level12.getName());
-                    }).collect(Collectors.toList());
-                }
-                return catalog2Vos;
-            }));
-
-
-            //3.查到的数据再放入缓存 将对象转为json放在缓存中
-            String s = JSON.toJSONString(collect);
-            stringRedisTemplate.opsForValue().set("catalogJson",s,1, TimeUnit.DAYS);
-
-            return collect;
+            return getDataFromDb();
         }
     }
 

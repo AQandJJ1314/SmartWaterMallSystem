@@ -114,7 +114,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         //1.加入缓存逻辑   缓存中放的数据是json字符串
         //json跨语言跨平台兼容
         String catalogJson = stringRedisTemplate.opsForValue().get("catalogJson");
-        if(!StringUtils.isEmpty(catalogJson)){
+        if(StringUtils.isEmpty(catalogJson)){
+//            System.out.println("redis中无数据，来查询数据库");
             //2.缓存中没有，查询数据库
             Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDB();
             //3.查到的数据再放入缓存 将对象转为json放在缓存中

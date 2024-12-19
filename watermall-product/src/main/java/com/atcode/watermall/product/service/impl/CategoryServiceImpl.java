@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -107,22 +108,40 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         return categoryEntities;
     }
 
+
+    //TODO OutOfMemoryError  产生堆外内存异常  此性能未做压测，不清楚是否高版本已修复，后续做压测验证
+
+    /**
+     *    //springboot2.0以后默认使用lettuce作为redis的客户端，它使用netty进行网络通信
+     *    //lettuce的bug导致netty的堆外内存溢出 -Xmx300 netty如果没有指定堆外最大内存，默认使用-Xmx300
+     *    不能使用-Dio.netty.maxDirectMemory调大堆外内存，迟早会出问题。
+     *    解决方案
+     *      升级lettuce客户端（推荐）；【2.3.2已解决】【lettuce使用netty吞吐量很大】
+     *      切换使用jedis客户端
+     */
+
     @Override
     public Map<String, List<Catalog2Vo>> getCatalogJson() {
         //给缓存中放json字符串，拿出的json字符串还要逆转成能用的对象类型 ‘序列化与反序列化’
+
+        /**
+         * 1、空结果缓存，解决缓存穿透问题
+         * 2、设置过期时间（加随机值），解决缓存雪崩问题
+         * 3、加锁，解决缓存击穿问题
+         */
 
         //1.加入缓存逻辑   缓存中放的数据是json字符串
         //json跨语言跨平台兼容
         String catalogJson = stringRedisTemplate.opsForValue().get("catalogJson");
         if(StringUtils.isEmpty(catalogJson)){
-//            System.out.println("redis中无数据，来查询数据库");
+            System.out.println("缓存不命中....查询数据库...");
             //2.缓存中没有，查询数据库
             Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDB();
-            //3.查到的数据再放入缓存 将对象转为json放在缓存中
-            String s = JSON.toJSONString(catalogJsonFromDB);
-            stringRedisTemplate.opsForValue().set("catalogJson",s);
+//            //3.查到的数据再放入缓存 将对象转为json放在缓存中
+//            String s = JSON.toJSONString(catalogJsonFromDB);
+//            stringRedisTemplate.opsForValue().set("catalogJson",s,1, TimeUnit.DAYS);
         }
-
+        System.out.println("缓存命中....直接返回结果.....");
         //转为指定的对象
         Map<String, List<Catalog2Vo>> result = JSON.parseObject(catalogJson,new TypeReference<Map<String, List<Catalog2Vo>>>(){});
         return result;
@@ -130,36 +149,57 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     //从数据库查询并封装分类数据
     public Map<String, List<Catalog2Vo>> getCatalogJsonFromDB() {
-        /**
-         * 1.将数据库的多次查询变成一次
-         */
-        // 一次性获取所有 数据
-        List<CategoryEntity> selectList = baseMapper.selectList(null);
-        System.out.println("调用了 getCatalogJson  查询了数据库........【三级分类】");
-        // 1）、所有1级分类
-        List<CategoryEntity> level1Categorys = getParent_cid(selectList, 0L);
+        //只要是同一把锁，就能锁住需要这个锁的所有线程
+        //1、 synchronized (this) SpringBoot所有组件在容器中都是单例的
+        //TODO 本地（进程）锁，synchronized,JUC(Lock)只锁当前的进程的资源（实例对象/方法） ，分布式情况下想要锁住所有就得用分布式锁
 
-        // 2）、封装数据
-        Map<String, List<Catalog2Vo>> collect = level1Categorys.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), level1 -> {
-            // 查到当前1级分类的2级分类
-            List<CategoryEntity> category2level = getParent_cid(selectList, level1.getCatId());
-            List<Catalog2Vo> catalog2Vos = null;
-            if (category2level != null) {
-                catalog2Vos = category2level.stream().map(level12 -> {
-                    // 查询当前2级分类的3级分类
-                    List<CategoryEntity> category3level = getParent_cid(selectList, level12.getCatId());
-                    List<Catalog2Vo.Catalog3Vo> catalog3Vos = null;
-                    if (category3level != null) {
-                        catalog3Vos = category3level.stream().map(level13 -> {
-                            return new Catalog2Vo.Catalog3Vo(level12.getCatId().toString(), level13.getCatId().toString(), level13.getName());
-                        }).collect(Collectors.toList());
-                    }
-                    return new Catalog2Vo(level1.getCatId().toString(), catalog3Vos, level12.getCatId().toString(), level12.getName());
-                }).collect(Collectors.toList());
+        synchronized (this) {
+            //得到锁以后再去缓存中确定一次，如果没有，才需要继续查询
+            String catalogJson = stringRedisTemplate.opsForValue().get("catalogJson");
+            if(!StringUtils.isEmpty(catalogJson)){
+                //缓存不为null，直接返回
+                Map<String, List<Catalog2Vo>> result = JSON.parseObject(catalogJson,new TypeReference<Map<String, List<Catalog2Vo>>>(){});
+                return result;
             }
-            return catalog2Vos;
-        }));
-        return collect;
+
+            System.out.println("查询了数据库.....");
+            /**
+             * 1.将数据库的多次查询变成一次
+             */
+            // 一次性获取所有 数据
+            List<CategoryEntity> selectList = baseMapper.selectList(null);
+//            System.out.println("调用了 getCatalogJson  查询了数据库........【三级分类】");
+            // 1）、所有1级分类
+            List<CategoryEntity> level1Categorys = getParent_cid(selectList, 0L);
+
+            // 2）、封装数据
+            Map<String, List<Catalog2Vo>> collect = level1Categorys.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), level1 -> {
+                // 查到当前1级分类的2级分类
+                List<CategoryEntity> category2level = getParent_cid(selectList, level1.getCatId());
+                List<Catalog2Vo> catalog2Vos = null;
+                if (category2level != null) {
+                    catalog2Vos = category2level.stream().map(level12 -> {
+                        // 查询当前2级分类的3级分类
+                        List<CategoryEntity> category3level = getParent_cid(selectList, level12.getCatId());
+                        List<Catalog2Vo.Catalog3Vo> catalog3Vos = null;
+                        if (category3level != null) {
+                            catalog3Vos = category3level.stream().map(level13 -> {
+                                return new Catalog2Vo.Catalog3Vo(level12.getCatId().toString(), level13.getCatId().toString(), level13.getName());
+                            }).collect(Collectors.toList());
+                        }
+                        return new Catalog2Vo(level1.getCatId().toString(), catalog3Vos, level12.getCatId().toString(), level12.getName());
+                    }).collect(Collectors.toList());
+                }
+                return catalog2Vos;
+            }));
+
+
+            //3.查到的数据再放入缓存 将对象转为json放在缓存中
+            String s = JSON.toJSONString(collect);
+            stringRedisTemplate.opsForValue().set("catalogJson",s,1, TimeUnit.DAYS);
+
+            return collect;
+        }
     }
 
     /**

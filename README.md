@@ -562,3 +562,176 @@ lettuce的bug导致netty堆外内存溢出 -Xmx300m；netty如果没有指定堆
                     Arrays.asList("lock"), uuid);    //把key和value传给lua脚本
 
 总结：redis做分布式锁的两个核心是加锁和解锁都保证原子性
+
+redission锁官方文档
+https://github.com/redisson/redisson/wiki/1.-%E6%A6%82%E8%BF%B0
+
+Redisson分布式锁
+1.5.1 概念
+在分布式情况下，之前学过的锁“syncronized” 、“lock”和JUC包下的类都用不成了。需要用Redission分布式锁。
+
+Redisson是一个在Redis的基础上实现的Java驻内存数据网格（In-Memory Data Grid）。它不仅提供了一系列的分布式的Java常用对象，还提供了许多分布式服务。其中包括(BitSet, Set, Multimap, SortedSet, Map, List, Queue, BlockingQueue, Deque, BlockingDeque, Semaphore, Lock, AtomicLong, CountDownLatch, Publish / Subscribe, Bloom filter, Remote service, Spring cache, Executor service, Live Object service, Scheduler service)
+
+Redisson提供了使用Redis的最简单和最便捷的方法。Redisson的宗旨是促进使用者对Redis的关注分离（Separation of Concern），从而让使用者能够将精力更集中地放在处理业务逻辑上。
+
+本文我们仅关注分布式锁的实现，更多请参考Redisson官方文档
+
+整合redisson作为分布式锁等功能的框架
+ 1.引入依赖
+ 2.配置redisson
+
+位置：com.atcode.watermall.product.config.MyRedissonConfig
+    /**
+     * 所有对Redisson的操作都是通过RedissonClient对象
+     * @return
+     */3
+    @Bean(destroyMethod = "shutdown")
+    public RedissonClient redissonClient(){
+        //1.创建配置
+        Config config = new Config();
+        //设置单节点模式，设置redis地址。ssl安全连接redission://127.0.0.1:6379
+        config.useSingleServer().setAddress("redis://127.0.0.1:6379");
+        //2.根据Config创建出RedissonClient实例
+        RedissonClient redisson = Redisson.create(config);
+        return redisson;
+    }
+关于对可重入锁和不可重入锁的理解：如果有两个方法(业务)A,B,B在A中,也就是要在A中去执行B
+                            如果是可重入锁：那么对于A,A拿到一锁,此时B可以直接拿来A拿到的一锁来用，
+                            如果是不可重入锁，那么就会出现B一直等待A释放锁之后拿到锁且A等B执行完才要释放的情况，导致死锁
+
+测试redisson的分布式锁
+
+    @ResponseBody
+    @GetMapping("/hello")
+    public String hello() {
+        //1.调用getLock获取一把锁，只要锁的名字一样就是同一把锁
+        RLock lock = redissonClient.getLock("my-lock");
+
+        //2.加锁   阻塞式等待
+        lock.lock();
+        try{
+            System.out.println("加锁成功，执行业务....."+"当前线程："+Thread.currentThread().getId());
+            Thread.sleep(30000);
+        }catch (Exception e){
+
+        }
+        finally {
+            //3.解锁   假设解锁代码没有运行，redisson是否会出现死锁
+            System.out.println("释放锁....."+"当前线程："+Thread.currentThread().getId());
+            lock.unlock();
+        }
+
+        return "hello";
+    }
+
+lock()方法的两大特点：
+
+1、会有一个看门狗机制，在我们业务运行期间，将我们的锁自动续期
+
+2、为了防止死锁，加的锁设置成30秒的过期时间，不让看门狗自动续期，如果业务宕机，没有手动调用解锁代码，30s后redis也会对他自动解锁。
+
+上述方法依然存在问题：不指定锁的过期时间，默认30s，每到20s看门狗会自动续期成30s，有死锁风险
+
+指定锁的过期时间，看门狗不会自动续期   在自定义锁的存在时间时不会自动解锁
+lock.lock(30, TimeUnit.SECONDS);
+
+注意：
+设置的自动解锁时间一定要稳稳地大于业务时间
+
+        /**
+         *         1.给锁指定了过期时间，那么就不会有看门狗机制，但是要保证锁的过期时间必须完全大于业务时间
+         *         2.如果给锁指定了过期时间，就发送Lua脚本给Redis，过期时间就是指定的时间
+         *         3.如果未指定锁的超时时间，就使用30 * 1000(看门狗默认时间LockWatchdogTimeout())
+         *         4.只要占锁成功就会启动一个定时任务，给redis发Lua脚本重新指定过期时间，新的过期时间就是看门狗的默认时间
+         *         5.internalLockLeaseTime / 3,  1/3的看门狗时间之后续期
+         */
+
+模拟读写锁
+  一起读数据的请求互不影响，要是有一个在写，那其他的线程就不能读，得等写锁释放之后才能读，一般这两个锁都是成对出现的
+位置：com.atcode.watermall.product.web.IndexController
+
+         @GetMapping("/write")
+    @ResponseBody
+    public String writeValue() {
+        String s = "";
+        RReadWriteLock readWriteLock = redissonClient.getReadWriteLock("rw-lock");
+        RLock lock = readWriteLock.writeLock();
+        try {
+            //1.写数据加写锁
+            lock.lock();
+            s = UUID.randomUUID().toString();
+            stringRedisTemplate.opsForValue().set("writeValue",s);
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }finally {
+            lock.unlock();
+        }
+        return s;
+    }
+
+
+    @ResponseBody
+    @GetMapping("/read")
+    public String readValue() {
+        String s = "";
+        RReadWriteLock readWriteLock = redissonClient.getReadWriteLock("rw-lock");
+        RLock lock = readWriteLock.readLock();
+        try {
+            lock.lock();
+            //读数据加读锁
+           s = stringRedisTemplate.opsForValue().get("writeValue");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }finally {
+            lock.unlock();
+        }
+        return s;
+    }
+
+
+    /**
+     * 读写锁，读和写操作为互斥操作，这样做可以避免读到脏数据，修改期间写锁是排他锁(互斥锁，独享锁)，读锁是一个共享锁
+     * 在有一个线程写的时候其余线程均不能读，必须等写操作进行完成之后才可以读
+     * 读 + 读：相当于无锁，并发读，只会在redis中记录好当前的读锁，他们都会同时加锁成功
+     * 写 + 读： 等待写锁释放
+     * 写 + 写：  阻塞
+     * 读 + 写： 等待读锁释放  Thread.sleep(30000);
+     * @return
+     */
+读写锁总结：只要有写的存在，必须等待
+
+信号量 ： 可以用作限流，比如有10000个并发，信号量也有10000个，刚好被占满之后又有新的线程要来，
+         规定拿到信号量才能进行下一步业务操作，那么此时可以使用tryAcquire方法返回一个false提示稍后再试
+
+    /**
+     * 信号量测试，车库停车
+     * 获取
+     *  RSemaphore park = redissonClient.getSemaphore("park");
+     *  park.acquire();//获取一个信号量，占用一个车位   阻塞式方法，必须停
+     *  //boolean b = park.tryAcquire();//非阻塞式方法，可以不停，也就是可以没有信号量
+     *  释放
+     *   RSemaphore park = redissonClient.getSemaphore("park");
+     *   park.release();//释放一个信号量，释放一个车位
+     *
+     */
+
+闭锁  必须把闭锁中的要求全部执行完才可以执行闭锁的代码
+
+    /**
+     * 闭锁示例(CountDownLatch)
+     * 学校放假锁门
+     * 比如有12345五个班，只有五个班的同学全部走完才能锁门
+     * 
+     *   RCountDownLatch door = redissonClient.getCountDownLatch("door");
+     *         door.trySetCount(5);
+     *         door.await();  //等待闭锁都完成
+     *
+     *         return "放假了...";
+     *         
+     *  RCountDownLatch door = redissonClient.getCountDownLatch("door");
+     *         door.countDown();  //计数-1
+     *
+     *         return id+"班的人都走了...";
+     *  
+     */

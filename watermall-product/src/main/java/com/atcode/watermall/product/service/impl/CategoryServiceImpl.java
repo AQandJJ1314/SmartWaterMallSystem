@@ -154,36 +154,46 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         String uuid = UUID.randomUUID().toString();
         Boolean lock = stringRedisTemplate.opsForValue().setIfAbsent("lock", uuid,300,TimeUnit.SECONDS);
         if(lock){
+            System.out.println("获取分布式锁成功...");
             //加锁成功....执行业务
             //设置过期时间
 //            stringRedisTemplate.expire("lock",30,TimeUnit.SECONDS);
-            Map<String, List<Catalog2Vo>> dataFromDb = getDataFromDb();
-            //释放锁
+            Map<String, List<Catalog2Vo>> dataFromDb = null;
+            try {
+                dataFromDb = getDataFromDb();
+            }finally {
+
+
+                //释放锁
 //            stringRedisTemplate.delete("lock");
-            //获取值对比+对比成功删除  需要成为原子操作 使用Lua脚本解锁
+                //获取值对比+对比成功删除  需要成为原子操作 使用Lua脚本解锁
 //            String lockValue = stringRedisTemplate.opsForValue().get("lock");
 //            //判断是自己的锁才可以删除
 //            if(uuid.equals(lockValue)){stringRedisTemplate.delete("lock");}
-            // 2、查询UUID是否是自己，是自己的lock就删除
-            // 查询+删除 必须是原子操作：lua脚本解锁
-            String luaScript = "if redis.call('get',KEYS[1]) == ARGV[1]\n" +
-                    "then\n" +
-                    "    return redis.call('del',KEYS[1])\n" +
-                    "else\n" +
-                    "    return 0\n" +
-                    "end";
-            // 删除锁
-            Long lock1 = stringRedisTemplate.execute(
-                    new DefaultRedisScript<Long>(luaScript, Long.class),
-                    Arrays.asList("lock"), uuid);    //把key和value传给lua脚本
-
-
-
+                // 2、查询UUID是否是自己，是自己的lock就删除
+                // 查询+删除 必须是原子操作：lua脚本解锁
+                String luaScript = "if redis.call('get',KEYS[1]) == ARGV[1]\n" +
+                        "then\n" +
+                        "    return redis.call('del',KEYS[1])\n" +
+                        "else\n" +
+                        "    return 0\n" +
+                        "end";
+                // 删除锁
+                Long lock1 = stringRedisTemplate.execute(
+                        new DefaultRedisScript<Long>(luaScript, Long.class),
+                        Arrays.asList("lock"), uuid);    //把key和value传给lua脚本
+            }
 
             return dataFromDb;
         }else {
+            System.out.println("获取分布式锁失败，等待重试....");
             //加锁失败....重试
             //休眠100mm重试
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
             return getCatalogJsonFromDBWithRedisLock();//自旋的方式等待
         }
 

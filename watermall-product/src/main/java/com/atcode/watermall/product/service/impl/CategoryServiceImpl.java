@@ -5,6 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.atcode.watermall.product.service.CategoryBrandRelationService;
 import com.atcode.watermall.product.vo.Catalog2Vo;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
@@ -42,6 +44,9 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     @Autowired
     private CategoryBrandRelationService categoryBrandRelationService;
 
+    @Autowired
+    private RedissonClient redissonClient;
+
     @Override
     public PageUtils queryPage(Map<String, Object> params) {
         IPage<CategoryEntity> page = this.page(
@@ -61,7 +66,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         //2、递归组装多级分类的树形结构。先过滤得到一级分类，再加工递归设置一级分类的子孙分类，再排序，再收集
         List<CategoryEntity> level1Menus = entities.stream()
                 .filter(categoryEntity -> categoryEntity.getParentCid() == 0)
-                .map((menu)->{
+                .map((menu) -> {
                     // 设置一级分类的子分类
                     menu.setChildren(getChildren(menu, entities));
                     return menu;
@@ -81,7 +86,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         //TODO 1.检查当前删除的菜单是否被别的地方引用
 
 
-
         //逻辑删除
         baseMapper.deleteBatchIds(asList);
     }
@@ -89,7 +93,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     @Override
     public Long[] findCatelogPath(Long catelogId) {
         List<Long> paths = new ArrayList<>();
-        List<Long> parentPath = findParentPath(paths,catelogId);
+        List<Long> parentPath = findParentPath(paths, catelogId);
         return parentPath.toArray(new Long[parentPath.size()]);
     }
 
@@ -99,6 +103,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     public void updateCascade(CategoryEntity category) {
         this.updateById(category);
         categoryBrandRelationService.updateCategory(category.getCatId(), category.getName());
+
+
+        //同时修改缓存中的数据
+        //redis.del("catalogJSON");等待下次主动查询进行更新
     }
 
     @Override
@@ -111,12 +119,12 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     //TODO OutOfMemoryError  产生堆外内存异常  此性能未做压测，不清楚是否高版本已修复，后续做压测验证
 
     /**
-     *    //springboot2.0以后默认使用lettuce作为redis的客户端，它使用netty进行网络通信
-     *    //lettuce的bug导致netty的堆外内存溢出 -Xmx300 netty如果没有指定堆外最大内存，默认使用-Xmx300
-     *    不能使用-Dio.netty.maxDirectMemory调大堆外内存，迟早会出问题。
-     *    解决方案
-     *      升级lettuce客户端（推荐）；【2.3.2已解决】【lettuce使用netty吞吐量很大】
-     *      切换使用jedis客户端
+     * //springboot2.0以后默认使用lettuce作为redis的客户端，它使用netty进行网络通信
+     * //lettuce的bug导致netty的堆外内存溢出 -Xmx300 netty如果没有指定堆外最大内存，默认使用-Xmx300
+     * 不能使用-Dio.netty.maxDirectMemory调大堆外内存，迟早会出问题。
+     * 解决方案
+     * 升级lettuce客户端（推荐）；【2.3.2已解决】【lettuce使用netty吞吐量很大】
+     * 切换使用jedis客户端
      */
 
     @Override
@@ -132,10 +140,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         //1.加入缓存逻辑   缓存中放的数据是json字符串
         //json跨语言跨平台兼容
         String catalogJson = stringRedisTemplate.opsForValue().get("catalogJson");
-        if(StringUtils.isEmpty(catalogJson)){
+        if (StringUtils.isEmpty(catalogJson)) {
             System.out.println("缓存不命中....查询数据库...");
             //2.缓存中没有，查询数据库
-            Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDBWithRedisLock();
+            Map<String, List<Catalog2Vo>> catalogJsonFromDB = getCatalogJsonFromDBWithRedissonLock();
             /**
              *         //3.查到的数据再放入缓存 将对象转为json放在缓存中
              *             // String s = JSON.toJSONString(catalogJsonFromDB);
@@ -144,16 +152,49 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         }
         System.out.println("缓存命中....直接返回结果.....");
         //转为指定的对象
-        Map<String, List<Catalog2Vo>> result = JSON.parseObject(catalogJson,new TypeReference<Map<String, List<Catalog2Vo>>>(){});
+        Map<String, List<Catalog2Vo>> result = JSON.parseObject(catalogJson, new TypeReference<Map<String, List<Catalog2Vo>>>() {
+        });
         return result;
+    }
+
+
+    /**
+     * 缓存中的数据如何和数据库中的数据保持一致
+     * 缓存数据的一致性
+     * 解决方案： 双写模式 失效模式
+     * 双写模式： 数据库改完之后改缓存中的数据
+     * 失效模式： 数据库改完之后直接删除缓存中的数据 等待下次主动更新
+     * @return
+     */
+    public Map<String, List<Catalog2Vo>> getCatalogJsonFromDBWithRedissonLock() {
+
+        //1.占用分布式锁 redis 同时设置过期时间，避免因程序异常或者服务器宕机导致的死锁问题
+        /**
+         * 锁的名字，锁的粒度，越细越快
+         * 锁的粒度：具体缓存的是某个数据，比如说11号商品 可以用product-11-lock,12号用product-12-lock
+         * 如果上述两个商品用同一把锁，product-lock，那么如果11号商品是一千以内的并发，12号商品是百万级别的并发
+         * 就会出现11号锁等待12号锁释放了才拿到的尴尬情况
+         */
+
+
+
+        RLock lock = redissonClient.getLock("CatalogJson-lock");
+        lock.lock(30, TimeUnit.SECONDS);
+        Map<String, List<Catalog2Vo>> dataFromDb;
+        try {
+            dataFromDb = getDataFromDb();
+        } finally {
+            lock.unlock();
+        }
+        return dataFromDb;
     }
 
     public Map<String, List<Catalog2Vo>> getCatalogJsonFromDBWithRedisLock() {
 
         //1.占用分布式锁 redis 同时设置过期时间，避免因程序异常或者服务器宕机导致的死锁问题
         String uuid = UUID.randomUUID().toString();
-        Boolean lock = stringRedisTemplate.opsForValue().setIfAbsent("lock", uuid,300,TimeUnit.SECONDS);
-        if(lock){
+        Boolean lock = stringRedisTemplate.opsForValue().setIfAbsent("lock", uuid, 300, TimeUnit.SECONDS);
+        if (lock) {
             System.out.println("获取分布式锁成功...");
             //加锁成功....执行业务
             //设置过期时间
@@ -161,7 +202,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
             Map<String, List<Catalog2Vo>> dataFromDb = null;
             try {
                 dataFromDb = getDataFromDb();
-            }finally {
+            } finally {
 
 
                 //释放锁
@@ -185,7 +226,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
             }
 
             return dataFromDb;
-        }else {
+        } else {
             System.out.println("获取分布式锁失败，等待重试....");
             //加锁失败....重试
             //休眠100mm重试
@@ -201,9 +242,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     private Map<String, List<Catalog2Vo>> getDataFromDb() {
         String catalogJson = stringRedisTemplate.opsForValue().get("catalogJson");
-        if(!StringUtils.isEmpty(catalogJson)){
+        if (!StringUtils.isEmpty(catalogJson)) {
             //缓存不为null，直接返回
-            Map<String, List<Catalog2Vo>> result = JSON.parseObject(catalogJson,new TypeReference<Map<String, List<Catalog2Vo>>>(){});
+            Map<String, List<Catalog2Vo>> result = JSON.parseObject(catalogJson, new TypeReference<Map<String, List<Catalog2Vo>>>() {
+            });
             return result;
         }
 
@@ -240,7 +282,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
         //3.查到的数据再放入缓存 将对象转为json放在缓存中
         String s = JSON.toJSONString(collect);
-        stringRedisTemplate.opsForValue().set("catalogJson",s,1, TimeUnit.DAYS);
+        stringRedisTemplate.opsForValue().set("catalogJson", s, 1, TimeUnit.DAYS);
 
         return collect;
     }
@@ -267,6 +309,7 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     /**
      * 递归查询父节点id
+     *
      * @param paths
      * @param catelogId
      * @return
@@ -274,10 +317,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     private List<Long> findParentPath(List<Long> paths, Long catelogId) {
         CategoryEntity categoryEntity = this.getById(catelogId);
 
-        if(categoryEntity == null) return paths;
+        if (categoryEntity == null) return paths;
 
-        if (categoryEntity.getParentCid() != 0){
-            findParentPath(paths ,categoryEntity.getParentCid());
+        if (categoryEntity.getParentCid() != 0) {
+            findParentPath(paths, categoryEntity.getParentCid());
         }
         paths.add(catelogId);
         return paths;
@@ -288,11 +331,12 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 
     /**
      * 获取一个菜单的子菜单,递归查找
-     * @param root  当前菜单
-     * @param all   从哪里获取子菜单(所有菜单数据)
+     *
+     * @param root 当前菜单
+     * @param all  从哪里获取子菜单(所有菜单数据)
      * @return
      */
-    private List<CategoryEntity> getChildren(CategoryEntity root, List<CategoryEntity> all){
+    private List<CategoryEntity> getChildren(CategoryEntity root, List<CategoryEntity> all) {
         List<CategoryEntity> children = all.stream()
                 .filter(CategoryEntity -> CategoryEntity.getParentCid().equals(root.getCatId()))
                 .map(categoryEntity -> {
@@ -306,7 +350,6 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
                 .collect(Collectors.toList());
         return children;
     }
-
 
 
 }

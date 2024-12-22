@@ -802,3 +802,151 @@ lock.lock(30, TimeUnit.SECONDS);
 缓存中间件Canal             
 Canal是阿里的缓存中间件，Canal将自己伪装成数据库的从服务器，MySQL一有变化，它就会同步更新到redis。 
 ![img_2.png](img_2.png)
+
+
+SpringCache
+Spring 从 3.1 开始定义了 org.springframework.cache.Cache和 org.springframework.cache.CacheManager 接口来统一不同的缓存技术；并支持使用 JCache（JSR-107） 注解简化我们开发；
+Cache 接口为缓存的组件规范定义， 包含缓存的各种操作集合；Cache 接 口 下 Spring 提 供 了 各 种 xxxCache 的 实 现 ； 如 RedisCache ， EhCacheCache ,ConcurrentMapCache 等；
+每次调用需要缓存功能的方法时， Spring 会检查检查指定参数的指定的目标方法是否已经被调用过； 如果有就直接从缓存中获取方法调用后的结果， 如果没有就调用方法并缓存结果后返回给用户。 下次调用直接从缓存中获取。
+使用 Spring 缓存抽象时我们需要关注以下两点；
+1、 确定方法需要被缓存以及他们的缓存策略
+2、 从缓存中读取之前缓存存储的数据
+
+![img_3.png](img_3.png)
+
+注解
+Cache	缓存接口,定义缓存操作.实现有:RedisCache,RhCacheCache,ConcurrentMapCache等                                
+CacheManager	缓存管理器,管理各种缓存组件                             
+@Cacheable	主要针对方法配置,能够根据方法的请求参数对其结果进行缓存                          
+@CacheEvict	清空缓存                             
+@CachePut	保证方法被调用,又希望结果被缓存                   
+@Caching	组合上面三个注解多个操作                  
+@EnableCaching	开启基于注解的缓存                  
+@CacheConfig	在类级别分享缓存的相同配置           
+keyGenerator	缓存数据是key生成策略         
+serialize	缓存数据是value序列化策略
+ 
+![img_4.png](img_4.png)
+
+
+SpEL表达式语法
+
+![img_5.png](img_5.png)
+
+整合SpringCache简化缓存开发
+![img_6.png](img_6.png)
+
+导入依赖：
+<!--Spring Cache-->         
+<dependency>            
+<groupId>org.springframework.boot</groupId>         
+<artifactId>spring-boot-starter-cache</artifactId>          
+</dependency>           
+<!--redis-->            
+<dependency>            
+<groupId>org.springframework.boot</groupId>         
+<artifactId>spring-boot-starter-data-redis</artifactId>             
+</dependency>           
+
+
+
+配置使用redis作为缓存                           
+spring:                         
+cache:                                           
+type: redis              
+开启缓存功能 @EnableCaching           
+使用缓存注解                      
+
+注解	作用
+@Cacheable	主要针对方法配置,能够根据方法的请求参数对其结果进行缓存            
+@CacheEvict	清空缓存            
+@CachePut	保证方法被调用,又希望结果被缓存            
+@Caching	组合上面三个注解多个操作        
+@EnableCaching	开启基于注解的缓存           
+@CacheConfig	在类级别分享缓存的相同配置           
+​ @Cacheable：标注方法上：当前方法的结果存入缓存，如果缓存中有，方法不调用     
+​ @CacheEvict：触发将数据从缓存删除的操作     
+​ @CachePut：不影响方法执行更新缓存     
+​ @Caching：组合以上多个操作         
+​ @CacheConfig：在类级别共享缓存的相同配置  
+
+
+
+
+异步与线程：                    
+位置：com.atcode.watermall.product.thread.ThreadTest.ThreadTest01
+/**
+* 初始化线程的4种方式
+* 1.1 继承 Thread类，重写run()方法
+* public static class ThreadTest001 extends Thread{
+*         @Override
+*         public void run() {
+*             System.out.println("当前线程id:  "+Thread.currentThread().getId());
+*             int i = 10/2;
+*             System.out.println("当前线程的运行结果:  "+ i);
+*
+*         }
+*
+*   public static void main(String[] args) {
+*
+*         ThreadTest001 thread = new ThreadTest001();
+*         thread.start();
+*
+*     }
+* 1.2 实现 Runnable 接口，重写run()方法
+*     public static class ThreadTest002 implements Runnable{
+*
+*         @Override
+*         public void run() {
+*             System.out.println("当前线程id:  "+Thread.currentThread().getId());
+*             int i = 10/2;
+*             System.out.println("当前线程的运行结果:  "+ i);
+*
+*         }
+*     }
+*
+*      public static void main(String[] args) {
+*
+*         System.out.println("main...start...");
+*         Runnable runnable = new ThreadTest002();
+*
+*         new Thread(runnable).start();
+*         System.out.println("main...end...");
+*
+*     }
+* 1.3 实现 Callable 接口 ， FutureTask （可以拿到返回结果， 可以处理异常）
+*      public static class ThreadTest003 implements Callable<Integer> {
+*
+*         @Override
+*         public Integer call() throws Exception {
+*             System.out.println("当前线程id:  "+Thread.currentThread().getId());
+*             int i = 10/2;
+*             System.out.println("当前线程的运行结果:  "+ i);
+*
+*             return i;
+*         }
+*     }
+*      public static void main(String[] args) throws ExecutionException, InterruptedException {
+*
+*         System.out.println("main...start...");
+*         FutureTask<Integer> futureTask = new FutureTask<>(new ThreadTest003());
+*         new Thread(futureTask).start();
+*         Integer integer = futureTask.get();  //阻塞方法，等线程执行完之后再执行
+*         System.out.println("main...end..."+integer);
+*
+*     }
+* 1.4 创建线程池直接提交任务（推荐）
+* 四种创建线程方法的区别
+* 区别：
+* 1、2不能得到返回值。3可以获取返回值
+* 1、2、3都不能控制资源
+* 4可以控制资源，性能稳定，不会一下子所有线程一起运行
+* 总结：
+* 1、实际开发中，只用线程池【高并发状态开启了n个线程，会耗尽资源】
+* 2、当前系统中线程池只有一两个，每个异步任务提交给线程池让他自己去执行
+  */
+
+
+
+
+

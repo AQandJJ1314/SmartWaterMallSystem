@@ -857,19 +857,87 @@ type: redis
 开启缓存功能 @EnableCaching           
 使用缓存注解                      
 
-注解	作用
-@Cacheable	主要针对方法配置,能够根据方法的请求参数对其结果进行缓存            
-@CacheEvict	清空缓存            
-@CachePut	保证方法被调用,又希望结果被缓存            
-@Caching	组合上面三个注解多个操作        
-@EnableCaching	开启基于注解的缓存           
-@CacheConfig	在类级别分享缓存的相同配置           
-​ @Cacheable：标注方法上：当前方法的结果存入缓存，如果缓存中有，方法不调用     
-​ @CacheEvict：触发将数据从缓存删除的操作     
-​ @CachePut：不影响方法执行更新缓存     
-​ @Caching：组合以上多个操作         
-​ @CacheConfig：在类级别共享缓存的相同配置  
 
+
+    /**
+     * 整合springCache简化缓存开发
+     * 1.引入依赖
+     *   写配置 CacheAutoConfiguration会导入RedisConfiguration
+     *   自动配置了缓存管理器RedisCacheManager
+     * 2.配置使用redis作为缓存
+     * 3.测试使用缓存
+     *   @Cacheable 主要针对方法配置, 能够根据方法的请求参数对其结果进行缓存  ：触发将数据保存到缓存的操作
+     *   @CacheEvict 清空缓存                                        ：  触发将数据从缓存删除的操作
+     *   @CachePut 保证方法被调用, 又希望结果被缓存                      ：   不影响方法执行的方式更新缓存
+     *   @Caching 组合上面三个注解多个操作                             ： 组合以上多个操作
+     *   @EnableCaching 开启基于注解的缓存
+     *   @CacheConfig 在类级别分享缓存的相同配置                      ：  在类级别分享缓存的相同配置
+     *   @Cacheable：标注方法上：当前方法的结果存入缓存，如果缓存中有，方法不调用
+     *   @CacheEvict：触发将数据从缓存删除的操作
+     *   @CachePut：不影响方法执行更新缓存
+     *   @Caching：组合以上多个操作
+     *   @CacheConfig：在类级别共享缓存的相同配置
+     *
+     * 4.原理：CacheAutoConfiguration->RedisCacheConfiguration->自动配置了RedisCacheManager->初始化所有的缓存->每个缓存决定使用什么配置
+     *        ->如果RedisCacheConfiguration有就用已有的，没有就用默认配置->如果要改配置，只需要给容器中增加一个RedisCacheConfiguration即可
+     *        ->就会应用到当前RedisCacheManager管理的所有缓存分区中
+     *
+     *    1.开启缓存功能     配置spring.cache.type: redis  启动类加@EnableCaching
+     *    2.只需要使用注解就能完成缓存操作
+     *    使用springcache对获取一级菜单加缓存
+     *        //每一个需要缓存的数据都需要指定放到哪个名字的缓存(缓存的分区，按照业务类型分)
+     *     @Cacheable ({ " category " })   //代表当前方法的结果需要缓存  如果缓存中有，那该方法就不会被调用，如果缓存中没有就调用该方法，最后将方法的结果放入缓存
+     *     位置：com.atcode.watermall.product.service.impl.CategoryServiceImpl
+     *    3.默认行为：
+     *       1.缓存中有，那么不调用这个被注解的方法；缓存中没有，调用该方法把数据存到缓存中
+     *       2.key自动生成： 缓存的名字 :: SimpleKey[](自主生成的key)
+     *       3.缓存的value的值：默认使用jdk序列化机制，将序列化后的结果存到redis
+     *       4.默认ttl时间：-1(永不过期)
+     *    4.自定义：
+     *            1. 指定生成的缓存使用的key  key属性指定，接收一个SpEl表达式
+     *                 @Cacheable (value = {"category"},key = "#root.method.name") value用数组是因为可以放入多个缓存区，比如分类区和product区
+     *                 @Cacheable (value = {"category"},key = "'Level1Categorys'")  key直接传字符串
+     *            2. 指定缓存的数据的存活时间
+     *            3. 将数据保存为json格式  位置：com.atcode.watermall.product.config.MyCacheConfig
+     *            配置信息：spring:
+     *                           cache:
+     *   	                    #指定缓存类型为redis
+     *                           type: redis
+     *                          redis:
+     *                          # 指定redis中的过期时间为1h
+     *                           time-to-live: 3600000
+     *                           key-prefix: CACHE_   #缓存key前缀
+     *                           use-key-prefix: true #是否开启缓存key前缀
+     *                           cache-null-values: true #缓存空值，解决缓存穿透问题
+     *
+     */
+
+    /**
+     * SpringCache原理与不足
+     * 1、读模式
+     * 缓存穿透：
+     *
+     * 查询一个null数据。解决方案：缓存空数据，可通过spring.cache.redis.cache-null-values=true
+     * 缓存击穿：
+     *
+     * 大量并发进来同时查询一个正好过期的数据。解决方案：加锁 ? 默认是无加锁的;
+     * 使用sync = true来解决击穿问题
+     * 缓存雪崩：
+     *
+     * 大量的key同时过期。解决：加随机时间。
+     * 2、写模式：（缓存与数据库一致）
+     * 读写加锁。
+     *
+     * 引入Canal，感知到MySQL的更新去更新Redis
+     *
+     * 读多写多，直接去数据库查询就行
+     *
+     * 3、总结
+     * 常规数据（读多写少，即时性，一致性要求不高的数据，完全可以使用Spring-Cache）：
+     * 写模式(只要缓存的数据有过期时间就足够了)
+     * 特殊数据：
+     * 特殊设计（读写锁等）
+     */
 
 
 

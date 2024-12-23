@@ -74,7 +74,7 @@ import java.util.concurrent.*;
  * 2、当前系统中线程池只有一两个，每个异步任务提交给线程池让他自己去执行
  */
 public class ThreadTest01 {
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
+    public  void thread01(String[] args) throws ExecutionException, InterruptedException {
         /**
          * 线程池[ExecutorService]
          * 创建线程池来执行异步任务
@@ -205,6 +205,49 @@ public class ThreadTest01 {
 
             return i;
         }
+    }
+
+
+    /**
+     * CompletableFuture 异步编排
+     * 当我们在异步任务编程的时候，可能会有场景如下：
+     *
+     * 可能你会想到用之前我们学到的Callable的方式去获取结果后，再执行；
+     *
+     * 但是这样子不能保证是异步与异步之间的结果；
+     *
+     * C不能感知到AB的结果后再异步执行；
+     *
+     * 所以，这里我们就引出了 CompletableFuture
+     *
+     * Future：可以获取到异步结果
+     *
+     */
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+
+
+        //不带返回值的runAsync
+//        CompletableFuture.runAsync(()->{
+//            System.out.println("当前线程id:  "+Thread.currentThread().getId());
+//            int i = 10/2;
+//            System.out.println("当前线程的运行结果:  "+ i);
+//        },executor);
+
+        System.out.println("main...start...");
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            System.out.println("当前线程id:  " + Thread.currentThread().getId());
+            int i = 10 / 0;  //模拟异常
+            System.out.println("当前线程的运行结果:  " + i);
+            return i;
+        }, executor).whenComplete((result,exception)->{
+            System.out.println("异步任务完成了...结果是"+result+";  异常是："+exception);
+        }).exceptionally((t,r)->{
+            // R apply(T t);
+
+        });
+        System.out.println("main...end...");
     }
 
 }

@@ -1111,3 +1111,83 @@ type: redis
 
 
 ![img_7.png](img_7.png)
+
+
+
+    /**
+     * CompletableFuture 异步编排
+     * 当我们在异步任务编程的时候，可能会有场景如下：
+     *
+     * 可能你会想到用之前我们学到的Callable的方式去获取结果后，再执行；
+     *
+     * 但是这样子不能保证是异步与异步之间的结果；
+     *
+     * C不能感知到AB的结果后再异步执行；
+     *
+     * 所以，这里我们就引出了 CompletableFuture
+     *
+     * Future：可以获取到异步结果
+     *
+     */
+
+
+        /**
+         * whenComplete 方法完成后的感知  成功时完成回调 只能感知结果不能处理
+         * handle  能感知结果，异常，处理结果  （方法执行完之后的处理，无论是成功完成还是失败完成）
+         * thenApply thenRun  线程串行化  加Async指新开一个线程执行，不加指共用一个线程
+         */
+
+
+
+//        CompletableFuture.runAsync(()->{
+//            System.out.println("当前线程id:  "+Thread.currentThread().getId());
+//            int i = 10/2;
+//            System.out.println("当前线程的运行结果:  "+ i);
+//        },executor);
+
+    public static void main(String[] args) throws ExecutionException, InterruptedException {
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+
+
+        //不带返回值的runAsync
+
+
+        /**
+         * whenComplete 成功时完成回调
+         */
+        System.out.println("main...start...");
+        CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+            System.out.println("当前线程id:  " + Thread.currentThread().getId());
+            int i = 10 / 0;  //模拟异常
+            System.out.println("当前线程的运行结果:  " + i);
+            return i;
+        }, executor).whenComplete((result,exception)->{
+            //虽然能得到异常信息，但是没法修改返回数据
+            System.out.println("异步任务完成了...结果是"+result+";  异常是："+exception);
+        }).exceptionally(throwable -> {
+            //可以感知异常同时返回默认值
+            return 10;
+        });
+        // R apply(T t);
+        System.out.println("main...end...最终返回结果: "+future.get());
+    }        } 
+
+
+
+/**
+*       //方法执行完成之后的处理，无论是成功完成还是失败完成
+*         System.out.println("main...start...");
+*                 CompletableFuture<Integer> future = CompletableFuture.supplyAsync(() -> {
+*             System.out.println("当前线程id:  " + Thread.currentThread().getId());
+*             int i = 10 / 0;  //模拟异常
+*             System.out.println("当前线程的运行结果:  " + i);
+*             return i;
+*         }, executor).handle((res,thr)->{
+*             if(res!=null){return res*2;}
+*             if(thr!=null){return 0;}
+*             return 0;
+*                 });
+*         //    R apply(T t, U u);
+*         System.out.println("main...end...最终返回结果: "+future.get());
+*     }
+*/

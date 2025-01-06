@@ -11,6 +11,7 @@
       <module fileurl="file://$PROJECT_DIR$/watermall-member/watermall-member.iml" filepath="$PROJECT_DIR$/watermall-member/watermall-member.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall-order/watermall-order.iml" filepath="$PROJECT_DIR$/watermall-order/watermall-order.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall-product/watermall-product.iml" filepath="$PROJECT_DIR$/watermall-product/watermall-product.iml" />
+      <module fileurl="file://$PROJECT_DIR$/watermall-search/watermall-search.iml" filepath="$PROJECT_DIR$/watermall-search/watermall-search.iml" />
       <module fileurl="file://$PROJECT_DIR$/watermall-ware/watermall-ware.iml" filepath="$PROJECT_DIR$/watermall-ware/watermall-ware.iml" />
     </modules>
   </component>

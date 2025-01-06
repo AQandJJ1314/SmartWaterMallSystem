@@ -1,5 +1,6 @@
 package com.atcode.watermall.product.service.impl;
 
+import com.atcode.common.to.ElasticSearchTo;
 import com.atcode.common.to.SkuReductionTo;
 import com.atcode.common.to.SpuBoundTo;
 import com.atcode.common.utils.R;
@@ -11,9 +12,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -182,5 +181,6 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
             });
         }
     }
+
 
 }

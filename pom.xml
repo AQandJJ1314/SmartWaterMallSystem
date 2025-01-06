@@ -17,6 +17,7 @@
         <module>watermall-product</module>
         <module>watermall-common</module>
         <module>watermall-gateway</module>
+        <module>watermall-search</module>
 
         <module>renren-fast</module>
         <module>renren-generator</module>

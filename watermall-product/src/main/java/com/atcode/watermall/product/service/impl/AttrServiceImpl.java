@@ -335,6 +335,20 @@ public class AttrServiceImpl extends ServiceImpl<AttrDao, AttrEntity> implements
     }
 
     /**
+     * 在指定的所有属性集合中，挑出所有的检索属性
+     * @param attrIds
+     * @return
+     */
+    @Override
+    public List<Long> selectSearchAttrIds(List<Long> attrIds) {
+        /**
+         * select attr_id from pms_attr where attr_id in(?) and search_type = 1
+         */
+        return baseMapper.selectSearchAttrIds(attrIds);
+    }
+
+
+    /**
      * 也可以不用xml，用wrapper删除，但时间复杂度和编写复杂度会比动态sql低一些：
      * @param attrId
      * @return

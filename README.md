@@ -1532,3 +1532,6 @@ type: redis
 *
 * 而 #.news ，则是所有以 news 结尾的路由键会进入这个队列，包括只有news的
   */
+
+
+@RequestBody  将请求体里的数据转换成json集合

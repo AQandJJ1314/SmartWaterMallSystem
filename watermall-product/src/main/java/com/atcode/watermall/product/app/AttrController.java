@@ -156,7 +156,7 @@ public class AttrController {
      */
     @GetMapping("/base/listforspu/{spuId}")
     public R baseListforspu(@PathVariable("spuId") Long spuId){
-        List<ProductAttrValueEntity> entityList = productAttrValueService.baseAttrlistForSpu(spuId);
+        List<ProductAttrValueEntity> entityList = productAttrValueService.baseAttrListForSpu(spuId);
 
         return R.ok().put("data", entityList);
     }

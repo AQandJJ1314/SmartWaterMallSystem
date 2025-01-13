@@ -28,6 +28,13 @@ public class SpuInfoController {
     @Autowired
     private SpuInfoService spuInfoService;
 
+    @PostMapping("/{spuId}/up")
+    public R spuUp(@PathVariable("spuId") Long spuId){
+        spuInfoService.up(spuId);
+        return R.ok();
+    }
+
+
     /**
      * 列表
      */
@@ -90,12 +97,6 @@ public class SpuInfoController {
     //@RequiresPermissions("product:spuinfo:delete")
     public R delete(@RequestBody Long[] ids){
 		spuInfoService.removeByIds(Arrays.asList(ids));
-
-        return R.ok();
-    }
-    @PostMapping("spuinfo/{spuId}/up")
-    public R spuUp(@PathVariable("spuId") Long spuId){
-        spuInfoService.up(spuId);
 
         return R.ok();
     }

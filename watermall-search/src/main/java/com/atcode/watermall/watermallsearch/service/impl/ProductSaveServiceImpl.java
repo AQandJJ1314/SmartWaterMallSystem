@@ -45,6 +45,7 @@ public class ProductSaveServiceImpl implements ProductSaveService {
             bulkRequest.add(indexRequest);
         }
 
+        //TODO 后续测试，到目前，上面代码的数据封装已经没有问题  20250114
         BulkResponse bulk = restHighLevelClient.bulk(bulkRequest, WatermallElasticSearchConfig.COMMON_OPTIONS);
 
         //TODO 如果批量错误
@@ -52,7 +53,7 @@ public class ProductSaveServiceImpl implements ProductSaveService {
         List<String> collect = Arrays.stream(bulk.getItems()).map(item -> {
             return item.getId();
         }).collect(Collectors.toList());
-        log.error("商品上架错误:{}",collect);
+        log.error("商品上架成功:{}",collect);
 
         return b;
 

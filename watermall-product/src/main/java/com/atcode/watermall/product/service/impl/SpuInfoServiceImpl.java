@@ -208,9 +208,9 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         // 2.1、发送远程调用，库存系统查询是否有库存
         Map<Long, Boolean> stockMap = null;
         try {
-            //TODO 远程调用出问题了，明天修复
-            R<List<SkuHasStockVo>> skuHasStockVo = wareFeignService.getSkusHasStock(skuIdList);
 
+            R<List<SkuHasStockVo>> skuHasStockVo = wareFeignService.getSkusHasStock(skuIdList);
+            //TODO 参数以及返回值的问题  上面一行代码，在远程调用时，debug模式下，容易报超时异常
             stockMap = skuHasStockVo.getData().stream().collect(Collectors.toMap(SkuHasStockVo::getSkuId, item -> item.getHasStock()));
 
         } catch (Exception e) {
@@ -228,7 +228,7 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         //这里先过滤，然后继续映射
         List<SkuEsModel.Attrs> attrsList = baseAttrs.stream().filter(item -> idSet.contains(item.getAttrId())).map(item -> {
             SkuEsModel.Attrs attrs1 = new SkuEsModel.Attrs();
-            BeanUtils.copyProperties(item, attrs1);
+            BeanUtils.copyProperties(item, attrs1);  // 使用该方法可能导致异常  原因 @Data注解失效  已解决
             return attrs1;
         }).collect(Collectors.toList());
 
@@ -264,9 +264,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         }).collect(Collectors.toList());
 
         // 3、将数据发送给es进行保存
+        //TODO 这里可以点进去看feign的调用，底层封装了一个requestTemplate    //测试时未在es的环境下，因此这里还需要测试
         R r = searchFeignService.productStatusUp(upProducts);
         System.out.println("=========================" + r);
         if (r.getCode() == 0) {
+//        if (true) {
+//            System.out.println("==================不接入es，修改上架状态测试=================");
             //远程调用成功
             // 3.1、修改当前spu的状态
             System.out.println("修改当前spu的状态");

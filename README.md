@@ -1535,3 +1535,30 @@ type: redis
 
 
 @RequestBody  将请求体里的数据转换成json集合
+
+位置： com.atcode.watermall.product.service.impl.SpuInfoServiceImpl 267  这里feign在底层将对象转换成了json
+
+        //TODO 这里可以点进去看feign的调用，底层封装了一个requestTemplate
+        R r = searchFeignService.productStatusUp(upProducts);
+![img_22.png](img_22.png)
+
+
+executeAndDecode(template, options);  执行且解码，然后返回Object 
+
+            /**
+             * Feign调用流程：
+             * 1、构造请求数据，将对象转为json
+             *      RequestTemplate template = buildTemplateFromArgs.create(argv);
+             * 2、发送请求进行执行（执行成功会解码响应数据）
+             *      executeAndDecode(template)
+             * 3、执行请求会有重试机制
+             *      while(true){
+             *          try{
+             *              executeAndDecode(template);
+             *          }catch(){
+             *              retryer.continueOrPropagate(e);
+             *              throw ex;
+             *              continue;
+             *          }
+             *      }
+             */

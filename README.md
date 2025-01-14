@@ -1591,3 +1591,6 @@ executeAndDecode(template, options);  执行且解码，然后返回Object
 	 *        }
 	 */
 ![img_23.png](img_23.png)
+
+对于重复上架可能会导致的数据多次添加问题
+因为每次上架都有唯一的id，因此即使多次点击上架按钮，对于一次添加成功之后，后面的添加均为更新操作(es中)

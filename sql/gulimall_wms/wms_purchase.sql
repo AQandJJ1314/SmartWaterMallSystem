@@ -1,0 +1,1 @@
+INSERT INTO `wms_purchase` (`id`, `assignee_id`, `assignee_name`, `phone`, `priority`, `status`, `ware_id`, `amount`, `create_time`, `update_time`) VALUES (5, 1, 'admin', '13612345678', 1, 3, NULL, NULL, '2024-12-13 15:40:05', '2024-12-13 15:53:03');

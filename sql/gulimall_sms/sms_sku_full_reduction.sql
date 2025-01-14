@@ -1,0 +1,11 @@
+INSERT INTO `sms_sku_full_reduction` (`id`, `sku_id`, `full_price`, `reduce_price`, `add_other`) VALUES (1, 3, 10000.0000, 500.0000, NULL);
+INSERT INTO `sms_sku_full_reduction` (`id`, `sku_id`, `full_price`, `reduce_price`, `add_other`) VALUES (2, 4, 10000.0000, 500.0000, NULL);
+INSERT INTO `sms_sku_full_reduction` (`id`, `sku_id`, `full_price`, `reduce_price`, `add_other`) VALUES (3, 4, 10000.0000, 500.0000, NULL);
+INSERT INTO `sms_sku_full_reduction` (`id`, `sku_id`, `full_price`, `reduce_price`, `add_other`) VALUES (4, 4, 1000.0000, 500.0000, NULL);
+INSERT INTO `sms_sku_full_reduction` (`id`, `sku_id`, `full_price`, `reduce_price`, `add_other`) VALUES (5, 4, 10000.0000, 500.0000, NULL);
+INSERT INTO `sms_sku_full_reduction` (`id`, `sku_id`, `full_price`, `reduce_price`, `add_other`) VALUES (6, 4, 10000.0000, 500.0000, NULL);
+INSERT INTO `sms_sku_full_reduction` (`id`, `sku_id`, `full_price`, `reduce_price`, `add_other`) VALUES (7, 4, 10000.0000, 500.0000, NULL);
+INSERT INTO `sms_sku_full_reduction` (`id`, `sku_id`, `full_price`, `reduce_price`, `add_other`) VALUES (8, 6, 1000.0000, 50.0000, NULL);
+INSERT INTO `sms_sku_full_reduction` (`id`, `sku_id`, `full_price`, `reduce_price`, `add_other`) VALUES (9, 6, 1000.0000, 50.0000, NULL);
+INSERT INTO `sms_sku_full_reduction` (`id`, `sku_id`, `full_price`, `reduce_price`, `add_other`) VALUES (10, 6, 1000.0000, 50.0000, NULL);
+INSERT INTO `sms_sku_full_reduction` (`id`, `sku_id`, `full_price`, `reduce_price`, `add_other`) VALUES (11, 6, 1000.0000, 50.0000, NULL);

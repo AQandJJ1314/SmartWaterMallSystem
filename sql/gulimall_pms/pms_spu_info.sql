@@ -1,0 +1,3 @@
+INSERT INTO `pms_spu_info` (`id`, `spu_name`, `spu_description`, `catalog_id`, `brand_id`, `weight`, `publish_status`, `create_time`, `update_time`) VALUES (3, '111', '111', 225, 1, 0.1000, 0, '2024-12-13 14:46:56', '2025-01-14 14:53:20');
+INSERT INTO `pms_spu_info` (`id`, `spu_name`, `spu_description`, `catalog_id`, `brand_id`, `weight`, `publish_status`, `create_time`, `update_time`) VALUES (4, 'iphone 15 ProMax', '这是一部iphone15手机', 225, 3, 0.4000, 0, '2024-12-13 15:08:29', '2024-12-13 15:08:29');
+INSERT INTO `pms_spu_info` (`id`, `spu_name`, `spu_description`, `catalog_id`, `brand_id`, `weight`, `publish_status`, `create_time`, `update_time`) VALUES (6, '测试上架用', '这是一个测试上架用的商品', 225, 2, 0.0500, 0, '2025-01-14 14:59:22', '2025-01-14 14:59:22');

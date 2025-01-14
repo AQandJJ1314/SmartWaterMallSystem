@@ -1,0 +1,11 @@
+INSERT INTO `sms_sku_ladder` (`id`, `sku_id`, `full_count`, `discount`, `price`, `add_other`) VALUES (1, 3, 2, 0.98, NULL, 1);
+INSERT INTO `sms_sku_ladder` (`id`, `sku_id`, `full_count`, `discount`, `price`, `add_other`) VALUES (2, 4, 3, 0.95, NULL, 0);
+INSERT INTO `sms_sku_ladder` (`id`, `sku_id`, `full_count`, `discount`, `price`, `add_other`) VALUES (3, 4, 3, 0.95, NULL, 0);
+INSERT INTO `sms_sku_ladder` (`id`, `sku_id`, `full_count`, `discount`, `price`, `add_other`) VALUES (4, 4, 3, 0.95, NULL, 0);
+INSERT INTO `sms_sku_ladder` (`id`, `sku_id`, `full_count`, `discount`, `price`, `add_other`) VALUES (5, 4, 3, 0.95, NULL, 0);
+INSERT INTO `sms_sku_ladder` (`id`, `sku_id`, `full_count`, `discount`, `price`, `add_other`) VALUES (6, 4, 3, 0.95, NULL, 0);
+INSERT INTO `sms_sku_ladder` (`id`, `sku_id`, `full_count`, `discount`, `price`, `add_other`) VALUES (7, 4, 3, 0.95, NULL, 0);
+INSERT INTO `sms_sku_ladder` (`id`, `sku_id`, `full_count`, `discount`, `price`, `add_other`) VALUES (8, 6, 1, 1.00, NULL, 0);
+INSERT INTO `sms_sku_ladder` (`id`, `sku_id`, `full_count`, `discount`, `price`, `add_other`) VALUES (9, 6, 1, 1.00, NULL, 0);
+INSERT INTO `sms_sku_ladder` (`id`, `sku_id`, `full_count`, `discount`, `price`, `add_other`) VALUES (10, 6, 1, 1.00, NULL, 0);
+INSERT INTO `sms_sku_ladder` (`id`, `sku_id`, `full_count`, `discount`, `price`, `add_other`) VALUES (11, 6, 1, 1.00, NULL, 0);

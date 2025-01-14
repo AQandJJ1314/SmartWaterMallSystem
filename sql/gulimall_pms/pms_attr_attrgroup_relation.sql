@@ -1,0 +1,12 @@
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (24, 27, 13, NULL);
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (25, 28, 13, NULL);
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (26, 29, 13, NULL);
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (27, 30, 13, NULL);
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (28, 31, 13, NULL);
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (29, 32, 14, NULL);
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (30, 33, 14, NULL);
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (31, 34, 15, NULL);
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (32, 35, 15, NULL);
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (33, 36, 15, NULL);
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (34, 37, 16, NULL);
+INSERT INTO `pms_attr_attrgroup_relation` (`id`, `attr_id`, `attr_group_id`, `attr_sort`) VALUES (35, 38, 16, NULL);

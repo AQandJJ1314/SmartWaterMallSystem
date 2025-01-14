@@ -133,8 +133,10 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
 //    @Cacheable (value = {"category"},key = "'Level1Categorys'")
     @Override
     public List<CategoryEntity> getLevel1Categorys() {
+        System.out.println("=======数据库查询进入一级分类=========");
         List<CategoryEntity> categoryEntities = this.baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
         return categoryEntities;
+//        return null;
     }
 
 

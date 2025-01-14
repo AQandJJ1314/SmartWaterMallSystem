@@ -25,7 +25,7 @@ public class ElasticSearchSaveController {
      */
     @PostMapping("/product")
     public R productStatusUp(@RequestBody List<SkuEsModel> skuEsModels){
-        boolean b = false;
+        boolean b = false;  //true代表有错误，false代表没错误
         try{
             b =  productSaveService.productStatusUp(skuEsModels);
         }catch (Exception e){

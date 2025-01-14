@@ -209,9 +209,12 @@ public class SpuInfoServiceImpl extends ServiceImpl<SpuInfoDao, SpuInfoEntity> i
         Map<Long, Boolean> stockMap = null;
         try {
 
-            R<List<SkuHasStockVo>> skuHasStockVo = wareFeignService.getSkusHasStock(skuIdList);
-            //TODO 参数以及返回值的问题  上面一行代码，在远程调用时，debug模式下，容易报超时异常
-            stockMap = skuHasStockVo.getData().stream().collect(Collectors.toMap(SkuHasStockVo::getSkuId, item -> item.getHasStock()));
+            R r = wareFeignService.getSkusHasStock(skuIdList);
+            //TODO 参数以及返回值的问题  上面一行代码，在远程调用时，debug模式下，容易报超时异常  这里也会报空指针异常
+//            stockMap = skuHasStockVo.getData().stream().collect(Collectors.toMap(SkuHasStockVo::getSkuId, item -> item.getHasStock()));
+            TypeReference<List<SkuHasStockVo>> typeReference = new TypeReference<List<SkuHasStockVo>>() {};
+            stockMap = r.getData(typeReference).stream().collect(Collectors.toMap(SkuHasStockVo::getSkuId, SkuHasStockVo::getHasStock));
+            System.out.println("==========================库存服务调用成功=============================");
 
         } catch (Exception e) {
             log.error("库存服务查询异常，原因：", e);

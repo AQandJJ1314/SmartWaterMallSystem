@@ -33,12 +33,13 @@ public class WareSkuController {
      * 查询sku是否有库存
      */
     @PostMapping("hasStock")
-    public R<List<SkuHasStockVo>> getSkusHasStock(@RequestBody List<Long> skuIds){
+    public R getSkusHasStock(@RequestBody List<Long> skuIds){
         // sku_id, stock
         List<SkuHasStockVo> vos = wareSkuService.getSkusHasStock(skuIds);
-        R<List<SkuHasStockVo>> ok = R.ok();
-        ok.setData(vos);
-        return ok;
+//        R ok = R.ok();
+        //TODO 这里保存的数据可能为空  解决空指针异常问题 R的类型是hashMap，再使用泛型这里进行setdata会出问题 解决方法：使用服务调用之后的类型转换解决，TypeReference 和 R的getData方法
+//        ok.setData(vos);
+        return R.ok().put("data",vos);
     }
     /**
      * 列表

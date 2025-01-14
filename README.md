@@ -1562,3 +1562,32 @@ executeAndDecode(template, options);  执行且解码，然后返回Object
              *          }
              *      }
              */
+
+位置： com.atcode.watermall.ware.controller.WareSkuController
+
+    /**
+     * 查询sku是否有库存
+     */
+    @PostMapping("hasStock")
+    public R getSkusHasStock(@RequestBody List<Long> skuIds){
+        // sku_id, stock
+        List<SkuHasStockVo> vos = wareSkuService.getSkusHasStock(skuIds);
+        R ok = R.ok();
+        //TODO 这里保存的数据可能为空   R的类型是hashMap，再使用泛型这里进行setdata会出问题
+        ok.setData(vos);
+        return ok;
+    }
+    /**
+
+位置： com.atcode.common.utils.R
+
+	/**
+	 * 涉及到不同服务之间调用之后的字符类型转换问题
+	 * 	public <T> T getData(TypeReference<T> typeReference) {
+	 * 		Object data = get("data");  //默认是map
+	 * 		String s = JSON.toJSONString(data);
+	 * 		T t = JSON.parseObject(s, typeReference);
+	 * 		return t;
+	 *        }
+	 */
+![img_23.png](img_23.png)

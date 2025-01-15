@@ -28,11 +28,12 @@ spring:
       time-to-live: 36000000   #失效了，需要进行问题排查  20250114  com.atcode.watermall.product.config.MyCacheConfig
       #设置key的前缀,一般情况下不要自定统一前缀,方便分区处理
       #如果指定了前缀，就使用我们指定的前缀作为前缀，未指定就默认使用缓存的名字作为前缀
-      key-prefix: CACHE_
+#      key-prefix: CACHE_
       #是否使用前缀
       use-key-prefix: true
       #是否允许空值 # 防止缓存穿透，可缓存null值
       cache-null-values: true
+
 
 mybatis-plus:
   mapper-locations: classpath*:/mapper/**/*.xml

@@ -100,11 +100,22 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
     }
 
 
-    //调用该方法会删除缓存category下的所有cache，如果要删除某个具体，用key="''"
-    //allEntries = true，value中分区删除里的所有数据
+    /**
+     * @CacheEvict
+     * 在上面实例中，在读模式中，我们将一级分类信息缓存到redis中，当请求再次获取数据时，直接从缓存中进行获取，但是如果执行的是写模式呢？
+     *  在写模式下，有两种方式来解决缓存一致性问题，双写模式和失效模式，在SpringCache中可以通过@CachePut来实现双写模式，使用@CacheEvict来实现失效模式。
+     *  实例：使用缓存失效机制实现更新数据库中值的是，使得缓存中的数据失效
+     *  修改updateCascade方法，添加@CacheEvict注解，指明要删除哪个分类下的数据，并且确定key
+     *     //调用该方法会删除缓存category下的所有cache，如果要删除某个具体，用key="''"
+     *     //allEntries = true，value中分区删除里的所有数据
+     * @param category
+     */
+
     //更新操作
     @Override
-    @CacheEvict(value = {"category"},allEntries = true)   //调用该方法(updateCascade)会删除缓存category下的所有cache
+    @CacheEvict(value = {"category"},allEntries = true)   //调用该方法(updateCascade)会删除缓存category下的所有cache 全删没问题，下面的方法报异常
+//    @CacheEvict(value = {"category"}, key = "'getLevel1Categorys'")  //实现失效模式
+    @Transactional
     public void updateCascade(CategoryEntity category) {
         this.updateById(category);
         if (!StringUtils.isEmpty(category.getName())) {
@@ -136,9 +147,46 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
         System.out.println("=======数据库查询进入一级分类=========");
         List<CategoryEntity> categoryEntities = this.baseMapper.selectList(new QueryWrapper<CategoryEntity>().eq("parent_cid", 0));
         return categoryEntities;
-//        return null;
     }
 
+    @Cacheable (value = {"category"},key = "#root.method.name")
+    @Override
+    public Map<String, List<Catalog2Vo>> getCatalogJson() {
+        System.out.println("查询了数据库.....");
+        /**
+         * 1.将数据库的多次查询变成一次
+         */
+        // 一次性获取所有 数据
+        List<CategoryEntity> selectList = baseMapper.selectList(null);
+        // 1）、所有1级分类
+        List<CategoryEntity> level1Categorys = getParent_cid(selectList, 0L);
+
+        // 2）、封装数据
+        Map<String, List<Catalog2Vo>> collect = level1Categorys.stream().collect(Collectors.toMap(k -> k.getCatId().toString(), level1 -> {
+            // 查到当前1级分类的2级分类
+            List<CategoryEntity> category2level = getParent_cid(selectList, level1.getCatId());
+            List<Catalog2Vo> catalog2Vos = null;
+            if (category2level != null) {
+                catalog2Vos = category2level.stream().map(level12 -> {
+                    // 查询当前2级分类的3级分类
+                    List<CategoryEntity> category3level = getParent_cid(selectList, level12.getCatId());
+                    List<Catalog2Vo.Catalog3Vo> catalog3Vos = null;
+                    if (category3level != null) {
+                        catalog3Vos = category3level.stream().map(level13 -> {
+                            return new Catalog2Vo.Catalog3Vo(level12.getCatId().toString(), level13.getCatId().toString(), level13.getName());
+                        }).collect(Collectors.toList());
+                    }
+                    return new Catalog2Vo(level1.getCatId().toString(), catalog3Vos, level12.getCatId().toString(), level12.getName());
+                }).collect(Collectors.toList());
+            }
+            return catalog2Vos;
+        }));
+
+
+        return collect;
+
+
+    }
 
     //TODO OutOfMemoryError  产生堆外内存异常  此性能未做压测，不清楚是否高版本已修复，后续做压测验证
 
@@ -151,8 +199,8 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryDao, CategoryEntity
      * 切换使用jedis客户端
      */
 
-    @Override
-    public Map<String, List<Catalog2Vo>> getCatalogJson() {
+//    @Override
+    public Map<String, List<Catalog2Vo>> getCatalogJson2() {
         //给缓存中放json字符串，拿出的json字符串还要逆转成能用的对象类型 ‘序列化与反序列化’
 
         /**

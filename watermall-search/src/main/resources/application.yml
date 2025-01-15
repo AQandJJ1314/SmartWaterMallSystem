@@ -7,6 +7,8 @@ spring:
   #        group: dev
   application:
     name: watermall-search
+  thymeleaf:
+    cache: false
 
 
 

@@ -60,8 +60,15 @@ spring:
         - id: watermall_host_route
           uri: lb://watermall-product
           predicates:
-             - Host=**.watermall.com
+             - Host=watermall.com
 
+        #检索业务
+        - id: watermall_search_route
+          uri: lb://watermall-search
+          predicates:
+            - Host=search.watermall.com
+  thymeleaf:
+    cache: false
   application:
     name: watermall-gateway
 #应用名称在nacos也配置了，防止迁移之后无nacos，所以这里也做配置

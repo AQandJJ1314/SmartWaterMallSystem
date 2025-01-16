@@ -23,7 +23,7 @@
       <module name="renren-fast" target="1.8" />
       <module name="renren-generator" target="1.8" />
       <module name="SmartWaterMallSystem" target="1.8" />
-      <module name="watermall" target="1.8" />
+      <module name="watermall" target="1.5" />
       <module name="watermall-common" target="1.8" />
       <module name="watermall-coupon" target="1.8" />
       <module name="watermall-gateway" target="1.8" />
@@ -38,6 +38,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="renren-fast" options="-parameters" />
       <module name="renren-generator" options="-parameters" />
+      <module name="watermall-search" options="" />
     </option>
   </component>
 </project>

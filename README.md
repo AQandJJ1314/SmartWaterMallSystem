@@ -1599,3 +1599,6 @@ executeAndDecode(template, options);  执行且解码，然后返回Object
 127.0.0.1    watermall.com
 127.0.0.1    search.watermall.com
 127.0.0.1    item.watermall.com
+
+
+注意修改js文件之后要清一下浏览器的缓存才能看到修改之后的结果

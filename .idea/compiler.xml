@@ -25,7 +25,7 @@
       <module name="renren-generator" target="1.8" />
       <module name="SmartWaterMallSystem" target="1.8" />
       <module name="watermall" target="1.5" />
-      <module name="watermall-auth-server" target="1.5" />
+      <module name="watermall-auth-server" target="1.6" />
       <module name="watermall-common" target="1.8" />
       <module name="watermall-coupon" target="1.8" />
       <module name="watermall-gateway" target="1.8" />

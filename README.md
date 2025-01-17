@@ -1602,3 +1602,8 @@ executeAndDecode(template, options);  执行且解码，然后返回Object
 
 
 注意修改js文件之后要清一下浏览器的缓存才能看到修改之后的结果
+
+/**
+* 用于用户注册的vo  http://auth.watermall.com/reg.html
+* com.atcode.watermall.member.vo.MemberRegistVo
+  */

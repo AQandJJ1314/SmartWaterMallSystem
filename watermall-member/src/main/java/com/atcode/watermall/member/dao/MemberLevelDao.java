@@ -6,12 +6,13 @@ import org.apache.ibatis.annotations.Mapper;
 
 /**
  * 会员等级
- * 
+ *
  * @author JiangCheng
  * @email JiangCheng@watermail.com
  * @date 2024-11-26 10:53:20
  */
 @Mapper
 public interface MemberLevelDao extends BaseMapper<MemberLevelEntity> {
-	
+
+    MemberLevelEntity getDefaultLevel();
 }

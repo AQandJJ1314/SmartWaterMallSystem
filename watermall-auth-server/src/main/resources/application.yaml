@@ -5,8 +5,12 @@ spring:
         server-addr: 127.0.0.1:8848
   #        namespace: ed02e004-02e9-43df-95e0-9f4a3c8c069f
   #        group: dev
+  redis:
+    host: localhost
+    port: 6379
   application:
     name: watermall-auth-server
 
 server:
   port: 31000
+

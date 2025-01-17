@@ -36,4 +36,20 @@ public class ElasticSearchSaveController {
         else {return R.error(BizCodeEnum.PRODUCT_UP_EXCEPTION.getCode(),BizCodeEnum.PRODUCT_UP_EXCEPTION.getMsg());}
 
     }
+
+//    @PostMapping("/product")
+//    public R saveProductAsIndices(@RequestBody List<SkuEsModel> skuEsModels) {
+//        boolean status = false;
+//        try {
+//            status=productSaveService.saveProductAsIndices(skuEsModels);
+//        } catch (Exception e) {
+//            log.error("远程保存索引失败");
+//        }
+//        if (status){
+//            return R.ok();
+//        }else {
+//            return R.error(BizCodeEnum.PRODUCT_UP_EXCEPTION.getCode(), BizCodeEnum.PRODUCT_UP_EXCEPTION.getMsg());
+//        }
+//
+//    }
 }

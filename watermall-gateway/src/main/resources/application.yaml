@@ -60,7 +60,7 @@ spring:
         - id: watermall_host_route
           uri: lb://watermall-product
           predicates:
-             - Host=watermall.com
+             - Host=watermall.com,item.watermall.com
 
         #检索业务
         - id: watermall_search_route

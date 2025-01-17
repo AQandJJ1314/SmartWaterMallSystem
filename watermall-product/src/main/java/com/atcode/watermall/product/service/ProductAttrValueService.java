@@ -1,5 +1,6 @@
 package com.atcode.watermall.product.service;
 
+import com.atcode.watermall.product.vo.SpuItemAttrGroupVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atcode.common.utils.PageUtils;
 import com.atcode.watermall.product.entity.ProductAttrValueEntity;
@@ -22,5 +23,6 @@ public interface ProductAttrValueService extends IService<ProductAttrValueEntity
 
     void updateSpuAttr(Long spuId, List<ProductAttrValueEntity> entities);
 
+    List<SpuItemAttrGroupVo> getProductGroupAttrsBySpuId(Long spuId, Long catalogId);
 }
 

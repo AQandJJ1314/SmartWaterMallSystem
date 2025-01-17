@@ -32,6 +32,7 @@ public class IndexController {
     @GetMapping({"/","index.html"})
 //参数是springMvc提供的接口，Model类，给这个类的对象里放的数据就会存到页面请求域中
     public String indexPage(Model model){    //传参Model类
+        System.out.println("===================进入了productindex方法===============");
         // TODO 1、查出所有1级分类
         List<CategoryEntity> categoryEntities = categoryService.getLevel1Categorys();
         model.addAttribute("categories",categoryEntities);

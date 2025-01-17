@@ -1,9 +1,11 @@
 package com.atcode.watermall.product.service;
 
+import com.atcode.watermall.product.vo.SkuItemSaleAttrVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atcode.common.utils.PageUtils;
 import com.atcode.watermall.product.entity.SkuSaleAttrValueEntity;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,5 +18,7 @@ import java.util.Map;
 public interface SkuSaleAttrValueService extends IService<SkuSaleAttrValueEntity> {
 
     PageUtils queryPage(Map<String, Object> params);
+
+    List<SkuItemSaleAttrVo> listSaleAttrs(Long spuId);
 }
 

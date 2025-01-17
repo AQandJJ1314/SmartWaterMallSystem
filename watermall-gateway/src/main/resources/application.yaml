@@ -67,6 +67,12 @@ spring:
           uri: lb://watermall-search
           predicates:
             - Host=search.watermall.com
+
+        #登录业务
+        - id: watermall_auth_route
+          uri: lb://watermall-auth-server
+          predicates:
+            - Host=auth.watermall.com
   thymeleaf:
     cache: false
   application:

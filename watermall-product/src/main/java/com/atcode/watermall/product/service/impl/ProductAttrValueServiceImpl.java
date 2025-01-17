@@ -1,5 +1,6 @@
 package com.atcode.watermall.product.service.impl;
 
+import com.atcode.watermall.product.vo.SpuItemAttrGroupVo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,6 +44,12 @@ public class ProductAttrValueServiceImpl extends ServiceImpl<ProductAttrValueDao
             entity.setSpuId(spuId);
         }
         this.saveBatch(entities);
+    }
+
+    @Override
+    public List<SpuItemAttrGroupVo> getProductGroupAttrsBySpuId(Long spuId, Long catalogId) {
+
+        return baseMapper.getProductGroupAttrsBySpuId(spuId, catalogId);
     }
 
 }

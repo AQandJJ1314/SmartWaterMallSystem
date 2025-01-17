@@ -1,5 +1,6 @@
 package com.atcode.watermall.product.service;
 
+import com.atcode.watermall.product.vo.SkuItemVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.atcode.common.utils.PageUtils;
 import com.atcode.watermall.product.entity.SkuInfoEntity;
@@ -19,5 +20,7 @@ public interface SkuInfoService extends IService<SkuInfoEntity> {
     PageUtils queryPage(Map<String, Object> params);
 
     List<SkuInfoEntity> getSkuBySpuId(Long spuId);
+
+    SkuItemVo item(Long skuId);
 }
 

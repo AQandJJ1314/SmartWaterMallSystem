@@ -14,3 +14,7 @@ spring:
 server:
   port: 31000
 
+
+logging:
+  level:
+    com.atcode.watermall.watermall-auth-server: debug

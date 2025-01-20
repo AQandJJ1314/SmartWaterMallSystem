@@ -74,6 +74,7 @@ public class LoginController {
             Map<String, String> errors = new HashMap<>();
             errors.put("msg", msg);
             attributes.addFlashAttribute("errors", errors);
+            //TODO 后续加一个提示框，提示密码错误
             return "redirect:http://auth.watermall.com/login.html";
         }
     }
@@ -101,6 +102,8 @@ public class LoginController {
     }
 
     /**
+     * http://watermall.com/
+     * http://auth.watermall.com/regist
      * 重定向携带数据，利用session原理。将数据放在session中。只要跳到下一个页面，取出数据以后，session里面的数据就会删掉
      * RedirectAttributes redirectAttributes 模拟重定向携带数据
      * @param vo
@@ -108,8 +111,10 @@ public class LoginController {
      * @param redirectAttributes
      * @return
      */
+
+    //TODO 这里加了一个 @RequestBody 注解之后可以使用postman测试，发送的数据可以被封装 被后端接收到  后续按需修改
     @PostMapping("/regist")
-    public String regist(@Valid UserRegistVo vo, BindingResult result,
+    public String regist(@Valid @RequestBody UserRegistVo vo, BindingResult result,
                          RedirectAttributes redirectAttributes){
         if (result.hasErrors()){
             /**

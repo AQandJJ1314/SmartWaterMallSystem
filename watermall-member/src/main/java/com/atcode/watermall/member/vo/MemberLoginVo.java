@@ -4,16 +4,17 @@ import lombok.Data;
 
 @Data
 public class MemberLoginVo {
-    private String loginacct;
+    private String loginAccount;
 
     private String password;
 
-    public String getLoginacct() {
-        return loginacct;
+
+    public String getLoginAccount() {
+        return loginAccount;
     }
 
-    public void setLoginacct(String loginacct) {
-        this.loginacct = loginacct;
+    public void setLoginAccount(String loginAccount) {
+        this.loginAccount = loginAccount;
     }
 
     public String getPassword() {

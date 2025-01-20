@@ -81,11 +81,11 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
 
     @Override
     public MemberEntity login(MemberLoginVo vo) {
-        String loginacct = vo.getLoginacct();
+        String loginAccount = vo.getLoginAccount();
         String password = vo.getPassword();
         // 去数据库查询
         MemberDao memberDao = this.baseMapper;
-        MemberEntity memberEntity = memberDao.selectOne(new QueryWrapper<MemberEntity>().eq("username", loginacct).or().eq("mobile", loginacct));
+        MemberEntity memberEntity = memberDao.selectOne(new QueryWrapper<MemberEntity>().eq("username", loginAccount).or().eq("mobile", loginAccount));
         if (memberEntity == null){
             // 登录失败
             return null;
@@ -94,8 +94,12 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             String passwordDB = memberEntity.getPassword();
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             // 2、密码匹配
-            boolean matches = passwordEncoder.matches(password, passwordDB);
+            //TODO 密码匹配规则，这里只做测试用equals
+//            boolean matches = passwordEncoder.matches(password, passwordDB);
+            boolean matches = password.equals(passwordDB) ? true : false;
+
             if (matches){
+                memberEntity.setPassword("");
                 return memberEntity;
             }else {
                 return null;

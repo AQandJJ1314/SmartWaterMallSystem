@@ -94,9 +94,9 @@ public class MemberServiceImpl extends ServiceImpl<MemberDao, MemberEntity> impl
             String passwordDB = memberEntity.getPassword();
             BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
             // 2、密码匹配
-            //TODO 密码匹配规则，这里只做测试用equals
-//            boolean matches = passwordEncoder.matches(password, passwordDB);
-            boolean matches = password.equals(passwordDB) ? true : false;
+            //TODO 密码匹配规则，这里只做测试用equals  测试完成
+            boolean matches = passwordEncoder.matches(password, passwordDB);
+//            boolean matches = password.equals(passwordDB) ? true : false;
 
             if (matches){
                 memberEntity.setPassword("");

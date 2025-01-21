@@ -112,9 +112,14 @@ public class LoginController {
      * @return
      */
 
-    //TODO 这里加了一个 @RequestBody 注解之后可以使用postman测试，发送的数据可以被封装 被后端接收到  后续按需修改
-    @PostMapping("/regist")
-    public String regist(@Valid @RequestBody UserRegistVo vo, BindingResult result,
+    /**
+     *  @RequestBody 注解之后可以使用postman测试，发送的数据可以被封装 被后端接收到  后续按需修改
+     *   @RequestBody 注解：@RequestBody 用于接收 JSON 格式的数据，但表单提交的数据是 application/x-www-form-urlencoded 格式，所以需要去掉 @RequestBody 注解。
+     * 处理表单验证结果：使用 BindingResult 来获取验证结果，如果有错误，将错误信息添加到 RedirectAttributes 中，并重定向到注册页面。
+      */
+
+    @PostMapping("/register")
+    public String regist(@Valid UserRegistVo vo, BindingResult result,
                          RedirectAttributes redirectAttributes){
         if (result.hasErrors()){
             /**
@@ -150,6 +155,7 @@ public class LoginController {
                 // 验证码通过,删除缓存中的验证码；令牌机制
                 stringRedisTemplate.delete(AuthServerConstant.SMS_CODE_CACHE_PREFIX + vo.getPhone());
                 // 真正注册调用远程服务注册
+                //TODO
                 R r = memberFeignService.regist(vo);
                 if (r.getCode() == 0) {
                     //成功

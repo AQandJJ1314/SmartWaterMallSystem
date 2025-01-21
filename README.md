@@ -1607,3 +1607,9 @@ executeAndDecode(template, options);  执行且解码，然后返回Object
 * 用于用户注册的vo  http://auth.watermall.com/reg.html
 * com.atcode.watermall.member.vo.MemberRegistVo
   */
+
+OSS
+![img_24.png](img_24.png)
+
+
+整合第三方OSS时   nacos registry, watermall-third-party 192.168.43.36:43000 register finished  地址问题未解决

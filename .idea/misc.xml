@@ -8,6 +8,7 @@
         <option value="$PROJECT_DIR$/watermall-getway/pom.xml" />
         <option value="$PROJECT_DIR$/watermall-search/pom.xml" />
         <option value="$PROJECT_DIR$/watermall-auth-server/pom.xml" />
+        <option value="$PROJECT_DIR$/watermall-third-party/pom.xml" />
       </list>
     </option>
   </component>

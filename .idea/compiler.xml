@@ -16,6 +16,7 @@
         <module name="watermall-search" />
         <module name="renren-fast" />
         <module name="watermall-common" />
+        <module name="watermall-third-party" />
         <module name="watermall-order" />
         <module name="renren-generator" />
       </profile>
@@ -33,6 +34,7 @@
       <module name="watermall-order" target="1.8" />
       <module name="watermall-product" target="1.8" />
       <module name="watermall-search" target="1.8" />
+      <module name="watermall-third-party" target="1.8" />
       <module name="watermall-ware" target="1.8" />
     </bytecodeTargetLevel>
   </component>

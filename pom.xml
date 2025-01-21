@@ -19,6 +19,7 @@
         <module>watermall-gateway</module>
         <module>watermall-search</module>
         <module>watermall-auth-server</module>
+        <module>watermall-third-party</module>
 
         <module>renren-fast</module>
         <module>renren-generator</module>

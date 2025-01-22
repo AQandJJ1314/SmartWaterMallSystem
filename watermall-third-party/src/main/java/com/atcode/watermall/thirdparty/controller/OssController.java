@@ -15,6 +15,12 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * 服务端签名后直传的原理如下：
+ * 1.用户发送上传Policy请求到应用服务器。
+ * 2.应用服务器返回上传Policy和签名给用户。
+ * 3.用户直接上传数据到OSS。
+ */
 @RestController
 public class OssController {
 

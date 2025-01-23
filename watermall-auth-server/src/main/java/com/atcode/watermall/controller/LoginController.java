@@ -37,14 +37,6 @@ public class LoginController {
 
     @Autowired
     StringRedisTemplate stringRedisTemplate;
-    /**
-     * 用户名密码登录
-     * 在gulimall-auth-server模块中的主体逻辑
-     *
-     * 通过会员服务远程调用登录接口
-     * 如果调用成功，重定向至首页
-     * 如果调用失败，则封装错误信息并携带错误信息重定向至登录页
-     */
 //    @PostMapping("/login")
 //    public String login(UserLoginVo vo, RedirectAttributes redirectAttributes){
 //        // 远程登录
@@ -59,6 +51,15 @@ public class LoginController {
 //            return "redirect:http://auth.watermall.com/login.html";
 //        }
 //    }
+
+    /**
+     * 用户名密码登录
+     * 在watermall-auth-server模块中的主体逻辑
+     *
+     * 通过会员服务远程调用登录接口
+     * 如果调用成功，重定向至首页
+     * 如果调用失败，则封装错误信息并携带错误信息重定向至登录页
+     */
 
     @RequestMapping("/login")
     public String login(UserLoginVo vo, RedirectAttributes attributes, HttpSession session){
@@ -79,8 +80,13 @@ public class LoginController {
         }
     }
 
+    /**
+     * 验证码校验以及调用第三方服务发送验证码
+     * @param phone
+     * @return
+     */
     @ResponseBody
-    @GetMapping("/sms/sendcode")
+    @GetMapping("/sms/sendCode")
     public R sendCode(@RequestParam("phone") String phone){
         // 1、接口防刷
         String prefixPhone = AuthServerConstant.SMS_CODE_CACHE_PREFIX + phone;
@@ -153,7 +159,7 @@ public class LoginController {
         if (!StringUtils.isEmpty(s)) {
             if (code.equals(s.split("_")[0])) {
                 // 验证码通过,删除缓存中的验证码；令牌机制
-                stringRedisTemplate.delete(AuthServerConstant.SMS_CODE_CACHE_PREFIX + vo.getPhone());
+//                stringRedisTemplate.delete(AuthServerConstant.SMS_CODE_CACHE_PREFIX + vo.getPhone());
                 // 真正注册调用远程服务注册
                 //TODO
                 R r = memberFeignService.regist(vo);
